@@ -102,15 +102,29 @@ export default function AnalyzePage(): React.ReactElement {
   const searchParams = useSearchParams();
   const [selectedGroup, setSelectedGroup] = useState<ProjectGroup | null>(null);
   const [userGroupId, setUserGroupId] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     const userGrpId = searchParams.get('userGroupId');
+    const rmId = searchParams.get('roomId');
+    
     if (userGrpId) {
-      const group = PROJECT_GROUPS.find(g => g.id === userGrpId);
+      // Load all groups including custom ones
+      const storedGroups = localStorage.getItem('projectGroups');
+      let allGroups = [...PROJECT_GROUPS];
+      if (storedGroups) {
+        const customGroups = JSON.parse(storedGroups);
+        allGroups = [...PROJECT_GROUPS, ...customGroups];
+      }
+      
+      const group = allGroups.find(g => g.id === userGrpId);
       if (group) {
         setSelectedGroup(group);
         setUserGroupId(userGrpId);
       }
+    }
+    if (rmId) {
+      setRoomId(rmId);
     }
   }, [searchParams]);
 
@@ -144,6 +158,16 @@ export default function AnalyzePage(): React.ReactElement {
   }, [selectedGroup]);
 
   const getDisplayMembers = (group: ProjectGroup): string[] => {
+    // Check if this is user's own group
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      if (userData.groupId === group.id) {
+        // User's own group - show user first, then other members
+        return [userData.name, ...group.members];
+      }
+    }
+    // Not user's group - show group name and members
     return [group.groupName, ...group.members];
   };
 
@@ -175,7 +199,7 @@ export default function AnalyzePage(): React.ReactElement {
       <div className="relative z-10 w-full min-h-screen px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         <div className="max-w-4xl mx-auto">
           <button 
-            onClick={() => router.push(`/?userGroupId=${userGroupId}`)}
+            onClick={() => router.push(`/?userGroupId=${userGroupId}&roomId=${roomId}`)}
             className="flex items-center gap-2 text-slate-600 hover:text-[#1D324B] transition-colors mb-6 font-black text-xs uppercase tracking-widest"
           >
             <ArrowLeft className="w-4 h-4" />

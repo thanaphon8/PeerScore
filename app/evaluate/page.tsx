@@ -101,10 +101,12 @@ export default function EvaluatePage(): React.ReactElement {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [selectedGroup, setSelectedGroup] = useState<ProjectGroup | null>(null);
   const [userGroupId, setUserGroupId] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     const groupId = searchParams.get('groupId');
     const userGrpId = searchParams.get('userGroupId');
+    const rmId = searchParams.get('roomId');
     if (groupId) {
       const group = PROJECT_GROUPS.find(g => g.id === groupId);
       if (group) {
@@ -113,6 +115,9 @@ export default function EvaluatePage(): React.ReactElement {
     }
     if (userGrpId) {
       setUserGroupId(userGrpId);
+    }
+    if (rmId) {
+      setRoomId(rmId);
     }
   }, [searchParams]);
 
@@ -123,6 +128,33 @@ export default function EvaluatePage(): React.ReactElement {
   const handleSubmit = (): void => {
     if (!selectedGroup) return;
     if (Object.keys(scores).length < EVALUATION_CRITERIA.length) return;
+    
+    // Save evaluation data
+    const evaluationData = {
+      groupId: selectedGroup.id,
+      evaluatorGroupId: userGroupId,
+      scores,
+      comment,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Save to localStorage
+    const existingEvaluations = localStorage.getItem('evaluations') || '[]';
+    const evaluations = JSON.parse(existingEvaluations);
+    evaluations.push(evaluationData);
+    localStorage.setItem('evaluations', JSON.stringify(evaluations));
+    
+    // Update submitted groups for this user
+    if (userGroupId) {
+      const submittedKey = `submissions_${userGroupId}`;
+      const existingSubmissions = localStorage.getItem(submittedKey) || '[]';
+      const submissions = JSON.parse(existingSubmissions);
+      if (!submissions.includes(selectedGroup.id)) {
+        submissions.push(selectedGroup.id);
+        localStorage.setItem(submittedKey, JSON.stringify(submissions));
+      }
+    }
+    
     setIsSubmitted(true);
   };
 
@@ -138,7 +170,7 @@ export default function EvaluatePage(): React.ReactElement {
     <div className="min-h-screen bg-[#1D324B] text-white selection:bg-white/10">
       <div className="max-w-4xl mx-auto px-4 py-8 relative z-10">
         <button 
-          onClick={() => router.push(`/?userGroupId=${userGroupId}`)}
+          onClick={() => router.push(`/?userGroupId=${userGroupId}&roomId=${roomId}`)}
           className="flex items-center gap-2 text-white/60 hover:text-white mb-8 font-black text-xs uppercase tracking-[0.3em] transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
@@ -184,7 +216,7 @@ export default function EvaluatePage(): React.ReactElement {
                 </div>
                 <h3 className="text-2xl font-black text-[#1D324B] mb-4 uppercase tracking-tight">Evaluation Submitted</h3>
                 <p className="text-slate-500 mb-8 font-medium">Thank you for your valuable feedback.</p>
-                <button onClick={() => router.push(`/?userGroupId=${userGroupId}`)} className="px-12 py-4 bg-[#1D324B] text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-transform uppercase tracking-widest text-xs">Return to List</button>
+                <button onClick={() => router.push(`/?userGroupId=${userGroupId}&roomId=${searchParams.get('roomId')}`)} className="px-12 py-4 bg-[#1D324B] text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-transform uppercase tracking-widest text-xs">Return to List</button>
               </div>
             ) : (
               <div className="space-y-12">
