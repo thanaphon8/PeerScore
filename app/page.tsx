@@ -12,7 +12,8 @@ import {
   Crown,
   Settings,
   User,
-  Copy
+  Copy,
+  Plus
 } from 'lucide-react';
 
 // --- Types ---
@@ -88,6 +89,8 @@ export default function App(): React.ReactElement {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [copiedRoomId, setCopiedRoomId] = useState<boolean>(false);
+  const [roomName, setRoomName] = useState<string>('');
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -108,6 +111,14 @@ export default function App(): React.ReactElement {
       return;
     }
     setRoomId(roomIdFromUrl);
+
+    // Load room name
+    const allRooms = localStorage.getItem('allRooms') || '{}';
+    const roomsData = JSON.parse(allRooms);
+    const room = roomsData[roomIdFromUrl];
+    if (room) {
+      setRoomName(room.name);
+    }
 
     // Load custom groups from localStorage
     const storedGroups = localStorage.getItem('projectGroups');
@@ -307,11 +318,11 @@ export default function App(): React.ReactElement {
                 </div>
                 
                 <div className="flex flex-col">
-                  <span className="text-xl font-black text-[#1D324B] tracking-tight">{currentUserGroup?.groupName}</span>
+                  <span className="text-xl font-black text-[#1D324B] tracking-tight">{userData.name}</span>
                   <div className="mt-1 flex flex-col gap-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-slate-400 text-[9px] uppercase tracking-widest font-black">Logged in:</span>
-                      <span className="text-[#1D324B] text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 rounded">{userData.name}</span>
+                      <span className="text-slate-400 text-[9px] uppercase tracking-widest font-black">Group:</span>
+                      <span className="text-[#1D324B] text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 rounded">{currentUserGroup?.groupName || 'No Group'}</span>
                     </div>
                   </div>
                 </div>
@@ -319,6 +330,9 @@ export default function App(): React.ReactElement {
 
               <div className="text-center">
                 <h1 className="text-3xl font-black text-[#1D324B] italic tracking-tighter uppercase">Group Evaluation</h1>
+                {roomName && (
+                  <p className="text-sm font-bold text-slate-600 mt-1">{roomName}</p>
+                )}
               </div>
               
               {/* Room ID Display */}
@@ -393,13 +407,22 @@ export default function App(): React.ReactElement {
                 </div>
                 
                 {userData?.userType === 'student' && roomId && (
-                  <button
-                    onClick={() => router.push(`/select-group?roomId=${roomId}`)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
-                  >
-                    <Users className="w-4 h-4" />
-                    เปลี่ยนกลุ่ม
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowCreateGroupModal(true)}
+                      className="px-4 py-2 bg-[#1D324B] hover:bg-[#152238] text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
+                    >
+                      <Plus className="w-4 h-4" />
+                      สร้างกลุ่มใหม่
+                    </button>
+                    <button
+                      onClick={() => router.push(`/select-group?roomId=${roomId}`)}
+                      className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
+                    >
+                      <Users className="w-4 h-4" />
+                      เปลี่ยนกลุ่ม
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -512,6 +535,176 @@ export default function App(): React.ReactElement {
                 })}
               </div>
            </div>
+        </div>
+      </div>
+
+      {/* Create Group Modal */}
+      {showCreateGroupModal && userData && roomId && (
+        <CreateGroupModal 
+          isOpen={showCreateGroupModal}
+          onClose={() => setShowCreateGroupModal(false)}
+          roomId={roomId}
+          userData={userData}
+          onGroupCreated={() => {
+            // Reload the page to show new group
+            window.location.reload();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// Create Group Modal Component
+interface CreateGroupModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  roomId: string;
+  userData: any;
+  onGroupCreated: () => void;
+}
+
+function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }: CreateGroupModalProps) {
+  const router = useRouter();
+  const [newGroupName, setNewGroupName] = useState<string>('');
+  const [newProjectName, setNewProjectName] = useState<string>('');
+  const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Load available users
+      const users: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('rooms_')) {
+          const userName = key.replace('rooms_', '');
+          if (userName !== userData.name) {
+            users.push(userName);
+          }
+        }
+      }
+      if (users.length === 0) {
+        users.push('สมชาย ใจดี', 'วิภา สุขใจ', 'กิตติ รักเรียน', 'อรทัย แสงใส', 'นพดล มั่นคง');
+      }
+      setAvailableUsers(users);
+    }
+  }, [isOpen, userData]);
+
+  const handleCreate = () => {
+    if (!newGroupName.trim() || !newProjectName.trim()) return;
+
+    const newGroupId = `g${Date.now()}`;
+    const newGroup = {
+      id: newGroupId,
+      groupName: newGroupName,
+      projectName: newProjectName,
+      members: selectedMembers
+    };
+
+    const storedGroups = localStorage.getItem('projectGroups') || '[]';
+    const groups = JSON.parse(storedGroups);
+    groups.push(newGroup);
+    localStorage.setItem('projectGroups', JSON.stringify(groups));
+
+    const updatedUserData = {
+      ...userData,
+      groupId: newGroupId,
+      groupName: newGroupName,
+      projectName: newProjectName,
+      isNewGroup: true,
+      newMembers: selectedMembers
+    };
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
+
+    onClose();
+    router.push(`/?userGroupId=${newGroupId}&roomId=${roomId}`);
+    onGroupCreated();
+  };
+
+  const toggleMember = (member: string) => {
+    setSelectedMembers(prev => 
+      prev.includes(member) ? prev.filter(m => m !== member) : [...prev, member]
+    );
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="bg-[#1D324B] p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <Plus className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-2xl font-black text-white">สร้างกลุ่มใหม่</h2>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+            <User className="w-6 h-6 text-white" />
+          </button>
+        </div>
+
+        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+          <div>
+            <label className="block text-xs font-black text-slate-700 mb-2 uppercase">ชื่อกลุ่ม</label>
+            <input
+              type="text"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              placeholder="เช่น Code Warriors"
+              className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-[#1D324B] outline-none font-bold"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-black text-slate-700 mb-2 uppercase">ชื่อโปรเจกต์</label>
+            <input
+              type="text"
+              value={newProjectName}
+              onChange={(e) => setNewProjectName(e.target.value)}
+              placeholder="เช่น AI System"
+              className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-[#1D324B] outline-none font-bold"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-black text-slate-700 mb-3 uppercase">
+              สมาชิก ({selectedMembers.length} คน)
+            </label>
+            <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border-2 border-slate-200">
+              {availableUsers.map((user) => (
+                <button
+                  key={user}
+                  onClick={() => toggleMember(user)}
+                  className={`p-3 rounded-xl border-2 transition-all text-left ${
+                    selectedMembers.includes(user) ? 'border-[#1D324B] bg-slate-100' : 'border-slate-200 hover:border-[#1D324B]/30 bg-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300">
+                      <img src={getRandomProfileImage(user)} alt={user} className="w-full h-full" />
+                    </div>
+                    <p className="font-bold text-sm text-[#1D324B] truncate flex-1">{user}</p>
+                    {selectedMembers.includes(user) && (
+                      <CheckCircle2 className="w-5 h-5 text-[#1D324B]" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 border-t border-slate-200 bg-slate-50 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 border-2 border-slate-300 rounded-xl font-black uppercase">
+            ยกเลิก
+          </button>
+          <button
+            onClick={handleCreate}
+            disabled={!newGroupName.trim() || !newProjectName.trim()}
+            className="flex-1 py-3 bg-[#1D324B] hover:bg-[#152238] disabled:bg-slate-300 text-white font-black rounded-xl uppercase"
+          >
+            สร้างกลุ่ม
+          </button>
         </div>
       </div>
     </div>

@@ -163,12 +163,24 @@ export default function AnalyzePage(): React.ReactElement {
     if (storedUserData) {
       const userData = JSON.parse(storedUserData);
       if (userData.groupId === group.id) {
-        // User's own group - show user first, then other members
+        // User's own group - show user first with their actual name from userData
         return [userData.name, ...group.members];
       }
     }
     // Not user's group - show group name and members
     return [group.groupName, ...group.members];
+  };
+
+  const isUserMember = (index: number): boolean => {
+    // First member (index 0) is the user if it's their own group
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      if (userData.groupId === selectedGroup?.id && index === 0) {
+        return true;
+      }
+    }
+    return false;
   };
 
   const getStatusText = (score: number): string => {
@@ -238,21 +250,32 @@ export default function AnalyzePage(): React.ReactElement {
                 <UserCircle className="w-4 h-4" /> Team Members
               </h3>
               <div className="flex flex-wrap gap-8">
-                {getDisplayMembers(selectedGroup).map((member, i) => (
-                  <div key={i} className="flex flex-col items-center gap-2 group">
-                    <div className="w-20 h-20 rounded-full overflow-hidden shadow-lg border-2 border-slate-200 ring-2 ring-slate-100">
-                      <img 
-                        src={getRandomProfileImage(member)} 
-                        alt={member}
-                        className="object-cover w-full h-full"
-                      />
+                {getDisplayMembers(selectedGroup).map((member, i) => {
+                  const isCurrentUser = isUserMember(i);
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-2 group">
+                      <div className={`w-20 h-20 rounded-full overflow-hidden shadow-lg border-2 ring-2 ${
+                        isCurrentUser ? 'border-blue-600 ring-blue-100' : 'border-slate-200 ring-slate-100'
+                      }`}>
+                        <img 
+                          src={getRandomProfileImage(member)} 
+                          alt={member}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <p className={`text-xs font-black ${isCurrentUser ? 'text-blue-600' : 'text-[#1D324B]'}`}>
+                          {member}
+                        </p>
+                        <p className={`text-[8px] font-bold uppercase ${
+                          isCurrentUser ? 'text-blue-600' : 'text-slate-400'
+                        }`}>
+                          {isCurrentUser ? 'You' : 'Member'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className="text-xs font-black text-[#1D324B]">{member}</p>
-                      <p className="text-[8px] font-bold text-slate-400 uppercase">{i === 0 ? 'You' : 'Member'}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
