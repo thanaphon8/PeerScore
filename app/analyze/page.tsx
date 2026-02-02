@@ -42,7 +42,7 @@ interface GroupStats {
   totalEvaluators: number;
   statsByCriteria: CriteriaStats[];
   overallAverage: number;
-  comments: string[];
+  comments: Array<{text: string, from: string, date: string}>;
 }
 
 const EVALUATION_CRITERIA: Criteria[] = [
@@ -141,19 +141,48 @@ export default function AnalyzePage(): React.ReactElement {
     });
     const overallAverage = statsByCriteria.reduce((acc, curr) => acc + curr.avgScore, 0) / statsByCriteria.length;
     
-    const mockComments = [
-      "งานออกแบบ UI สวยงามมากครับ ใช้งานง่ายและดูเป็นมืออาชีพ",
-      "ฟีเจอร์ AI ตอบโจทย์ได้ดี แต่อยากให้เพิ่มการแจ้งเตือนผ่านมือถือด้วยจะดีมาก",
-      "การนำเสนอทำได้ชัดเจน เข้าใจง่ายมากครับ เป็นโปรเจกต์ที่น่าสนใจ",
-      "ชอบความคิดสร้างสรรค์ในการแก้ปัญหาเรื่องความปลอดภัยครับ",
-      "อยากให้พัฒนาส่วนของ Dashboard ให้รองรับ Dark Mode ในอนาคตครับ"
-    ];
+    // Load real comments from localStorage
+    let realComments: Array<{text: string, from: string, date: string}> = [];
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const evaluationsStr = localStorage.getItem('evaluations');
+        if (evaluationsStr) {
+          const allEvaluations = JSON.parse(evaluationsStr);
+          // Filter evaluations for this group that have comments
+          const groupEvaluations = allEvaluations.filter(
+            (e: any) => e.groupId === selectedGroup.id && e.comment && e.comment.trim()
+          );
+          
+          // Load all groups to get evaluator names
+          const storedGroups = localStorage.getItem('projectGroups');
+          let allGroups = [...PROJECT_GROUPS];
+          if (storedGroups) {
+            const customGroups = JSON.parse(storedGroups);
+            allGroups = [...PROJECT_GROUPS, ...customGroups];
+          }
+          
+          realComments = groupEvaluations.map((e: any) => {
+            const evaluatorGroup = allGroups.find(g => g.id === e.evaluatorGroupId);
+            return {
+              text: e.comment,
+              from: evaluatorGroup?.groupName || 'Unknown Group',
+              date: new Date(e.timestamp).toLocaleDateString('th-TH', {
+                month: 'short',
+                day: 'numeric'
+              })
+            };
+          });
+        }
+      } catch (error) {
+        console.error('Error loading comments:', error);
+      }
+    }
 
     return {
       totalEvaluators,
       statsByCriteria,
       overallAverage: parseFloat(overallAverage.toFixed(1)),
-      comments: mockComments
+      comments: realComments
     };
   }, [selectedGroup]);
 
@@ -181,6 +210,19 @@ export default function AnalyzePage(): React.ReactElement {
       }
     }
     return false;
+  };
+
+  const getMemberAvatar = (member: string, index: number): string => {
+    // If this is the user (index 0 in own group), use their avatar
+    if (isUserMember(index)) {
+      const storedUserData = localStorage.getItem('userData');
+      if (storedUserData) {
+        const userData = JSON.parse(storedUserData);
+        return getRandomProfileImage(userData.avatar);
+      }
+    }
+    // Otherwise use member name for avatar
+    return getRandomProfileImage(member);
   };
 
   const getStatusText = (score: number): string => {
@@ -258,7 +300,7 @@ export default function AnalyzePage(): React.ReactElement {
                         isCurrentUser ? 'border-blue-600 ring-blue-100' : 'border-slate-200 ring-slate-100'
                       }`}>
                         <img 
-                          src={getRandomProfileImage(member)} 
+                          src={getMemberAvatar(member, i)} 
                           alt={member}
                           className="object-cover w-full h-full"
                         />
@@ -339,28 +381,49 @@ export default function AnalyzePage(): React.ReactElement {
           </div>
 
           <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-2xl">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-8 flex items-center gap-2 border-b border-slate-100 pb-4">
-                  <MessageSquare className="w-4 h-4" /> Feedback from Peers (ความคิดเห็นจากเพื่อน)
-              </h3>
+              <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-4">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" /> Feedback from Peers
+                </h3>
+                <button
+                  onClick={() => router.push(`/feedback?userGroupId=${userGroupId}&roomId=${roomId}`)}
+                  className="px-4 py-2 bg-[#1D324B] hover:bg-[#152238] text-white rounded-xl font-bold text-xs transition-all flex items-center gap-2 shadow-md uppercase"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  ดูทั้งหมด ({groupStats.comments.length})
+                </button>
+              </div>
               
               <div className="grid gap-6">
                   {groupStats.comments.length > 0 ? (
-                      groupStats.comments.map((text, idx) => (
+                      groupStats.comments.slice(0, 3).map((comment, idx) => (
                           <div key={idx} className="relative p-6 bg-slate-50 rounded-2xl border border-slate-100 hover:border-[#1D324B]/20 transition-all group">
                               <Quote className="absolute -top-3 -left-1 w-8 h-8 text-[#1D324B]/10 group-hover:text-[#1D324B]/20 transition-colors" />
                               <p className="text-[#1D324B] text-sm leading-relaxed font-medium pl-2">
-                                  "{text}"
+                                  "{comment.text}"
                               </p>
-                              <div className="mt-4 flex items-center gap-2 pl-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Verified Peer Feedback</span>
+                              <div className="mt-4 flex items-center justify-between pl-2">
+                                  <div className="flex items-center gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{comment.from}</span>
+                                  </div>
+                                  <span className="text-[9px] text-slate-400 font-medium">{comment.date}</span>
                               </div>
                           </div>
                       ))
                   ) : (
                       <div className="py-12 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                          <MessageSquare className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                           <p className="text-slate-400 font-bold italic">ยังไม่มีความคิดเห็นในขณะนี้</p>
                       </div>
+                  )}
+                  {groupStats.comments.length > 3 && (
+                      <button
+                          onClick={() => router.push(`/feedback?userGroupId=${userGroupId}&roomId=${roomId}`)}
+                          className="w-full py-3 text-center text-[#1D324B] font-bold hover:bg-slate-50 rounded-xl transition-colors text-sm"
+                      >
+                          ดูความคิดเห็นทั้งหมด ({groupStats.comments.length})
+                      </button>
                   )}
               </div>
           </div>

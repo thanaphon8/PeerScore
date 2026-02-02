@@ -107,8 +107,26 @@ export default function EvaluatePage(): React.ReactElement {
     const groupId = searchParams.get('groupId');
     const userGrpId = searchParams.get('userGroupId');
     const rmId = searchParams.get('roomId');
+    
     if (groupId) {
-      const group = PROJECT_GROUPS.find(g => g.id === groupId);
+      // Load all groups including custom ones from localStorage
+      let allGroups = [...PROJECT_GROUPS];
+      
+      // Check if we're on client side before accessing localStorage
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+        try {
+          const storedGroups = localStorage.getItem('projectGroups');
+          if (storedGroups) {
+            const customGroups = JSON.parse(storedGroups);
+            allGroups = [...PROJECT_GROUPS, ...customGroups];
+          }
+        } catch (error) {
+          console.error('Error loading custom groups:', error);
+        }
+      }
+      
+      // Find group in all groups (default + custom)
+      const group = allGroups.find(g => g.id === groupId);
       if (group) {
         setSelectedGroup(group);
       }

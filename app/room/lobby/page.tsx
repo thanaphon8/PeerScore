@@ -150,16 +150,14 @@ export default function RoomLobby(): React.ReactElement {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 text-[#1D324B] relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#1D324B]/[0.02] pointer-events-none" />
-      <div className="absolute top-20 left-20 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-slate-100 text-[#1D324B] relative overflow-hidden">
+      <div className="fixed inset-0 bg-[#1D324B]/[0.03] pointer-events-none" />
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-blue-100">
+            <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-xl ring-4 ring-slate-200">
               <img src={getAvatarUrl(userData.avatar)} alt={userData.name} className="w-full h-full object-cover" />
             </div>
           </div>
@@ -216,11 +214,11 @@ export default function RoomLobby(): React.ReactElement {
             onClick={() => setActiveTab('create')}
             className={`p-6 rounded-3xl border-2 transition-all ${
               activeTab === 'create'
-                ? 'bg-gradient-to-br from-blue-600 to-purple-600 border-blue-600 shadow-2xl shadow-blue-500/30'
-                : 'bg-white border-slate-200 hover:border-blue-300'
+                ? 'bg-[#1D324B] border-[#1D324B] shadow-2xl'
+                : 'bg-white border-slate-200 hover:border-[#1D324B]/30'
             }`}
           >
-            <Plus className={`w-12 h-12 mx-auto mb-3 ${activeTab === 'create' ? 'text-white' : 'text-blue-600'}`} />
+            <Plus className={`w-12 h-12 mx-auto mb-3 ${activeTab === 'create' ? 'text-white' : 'text-[#1D324B]'}`} />
             <h3 className={`text-xl font-black mb-1 ${activeTab === 'create' ? 'text-white' : 'text-[#1D324B]'}`}>
               สร้างห้อง
             </h3>
@@ -233,11 +231,11 @@ export default function RoomLobby(): React.ReactElement {
             onClick={() => setActiveTab('join')}
             className={`p-6 rounded-3xl border-2 transition-all ${
               activeTab === 'join'
-                ? 'bg-gradient-to-br from-green-600 to-emerald-600 border-green-600 shadow-2xl shadow-green-500/30'
-                : 'bg-white border-slate-200 hover:border-green-300'
+                ? 'bg-[#1D324B] border-[#1D324B] shadow-2xl'
+                : 'bg-white border-slate-200 hover:border-[#1D324B]/30'
             }`}
           >
-            <LogIn className={`w-12 h-12 mx-auto mb-3 ${activeTab === 'join' ? 'text-white' : 'text-green-600'}`} />
+            <LogIn className={`w-12 h-12 mx-auto mb-3 ${activeTab === 'join' ? 'text-white' : 'text-[#1D324B]'}`} />
             <h3 className={`text-xl font-black mb-1 ${activeTab === 'join' ? 'text-white' : 'text-[#1D324B]'}`}>
               เข้าร่วมห้อง
             </h3>
@@ -250,11 +248,11 @@ export default function RoomLobby(): React.ReactElement {
             onClick={() => setActiveTab('myrooms')}
             className={`p-6 rounded-3xl border-2 transition-all ${
               activeTab === 'myrooms'
-                ? 'bg-gradient-to-br from-amber-600 to-orange-600 border-amber-600 shadow-2xl shadow-amber-500/30'
-                : 'bg-white border-slate-200 hover:border-amber-300'
+                ? 'bg-[#1D324B] border-[#1D324B] shadow-2xl'
+                : 'bg-white border-slate-200 hover:border-[#1D324B]/30'
             }`}
           >
-            <History className={`w-12 h-12 mx-auto mb-3 ${activeTab === 'myrooms' ? 'text-white' : 'text-amber-600'}`} />
+            <History className={`w-12 h-12 mx-auto mb-3 ${activeTab === 'myrooms' ? 'text-white' : 'text-[#1D324B]'}`} />
             <h3 className={`text-xl font-black mb-1 ${activeTab === 'myrooms' ? 'text-white' : 'text-[#1D324B]'}`}>
               ห้องของฉัน
             </h3>
@@ -309,7 +307,7 @@ export default function RoomLobby(): React.ReactElement {
               <button
                 onClick={handleCreateRoom}
                 disabled={!roomName.trim()}
-                className="w-full py-5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:cursor-not-allowed text-lg"
+                className="w-full py-5 bg-[#1D324B] hover:bg-[#152238] disabled:bg-slate-300 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:cursor-not-allowed text-lg"
               >
                 <Sparkles className="w-6 h-6" />
                 สร้างห้อง
@@ -348,7 +346,7 @@ export default function RoomLobby(): React.ReactElement {
               <button
                 onClick={handleJoinRoom}
                 disabled={joinRoomId.length !== 6}
-                className="w-full py-5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:cursor-not-allowed text-lg"
+                className="w-full py-5 bg-[#1D324B] hover:bg-[#152238] disabled:bg-slate-300 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:cursor-not-allowed text-lg"
               >
                 เข้าร่วมห้อง
                 <ArrowRight className="w-6 h-6" />
@@ -360,8 +358,8 @@ export default function RoomLobby(): React.ReactElement {
           {activeTab === 'myrooms' && (
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <History className="w-6 h-6 text-amber-600" />
+                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center">
+                  <History className="w-6 h-6 text-[#1D324B]" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-[#1D324B]">ห้องของฉัน</h2>
@@ -372,32 +370,65 @@ export default function RoomLobby(): React.ReactElement {
               {myRooms.length > 0 ? (
                 <div className="grid gap-4">
                   {myRooms.map((room) => (
-                    <div key={room.id} className="p-5 bg-gradient-to-r from-slate-50 to-slate-100 border-2 border-slate-200 rounded-2xl hover:border-blue-300 transition-all group">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h3 className="font-black text-lg text-[#1D324B] mb-1">{room.name}</h3>
-                          <p className="text-xs text-slate-600 font-medium">
-                            สร้างโดย: {room.createdBy} • {new Date(room.createdAt).toLocaleDateString('th-TH')}
-                          </p>
+                    <div key={room.id} className="p-6 bg-white border-2 border-slate-200 rounded-2xl hover:border-[#1D324B]/30 transition-all group">
+                      <div className="flex items-start gap-4 mb-4">
+                        {/* Creator Profile */}
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-300 shadow-md flex-shrink-0">
+                          <img 
+                            src={getAvatarUrl(room.createdBy)} 
+                            alt={room.createdBy}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
+
+                        {/* Room Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-black text-xl text-[#1D324B] mb-1 truncate">{room.name}</h3>
+                          <div className="flex flex-col gap-1 text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-500 font-medium">สร้างโดย:</span>
+                              <span className="font-bold text-[#1D324B]">{room.createdBy}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-500 font-medium">วันที่:</span>
+                              <span className="font-bold text-slate-700">
+                                {new Date(room.createdAt).toLocaleDateString('th-TH', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-slate-500" />
+                              <span className="font-bold text-slate-700">6 กลุ่ม</span>
+                              <span className="text-slate-500 font-medium">ในห้องนี้</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Delete Button */}
                         <button
                           onClick={() => handleDeleteRoom(room.id)}
-                          className="p-2 hover:bg-red-100 rounded-lg transition-all"
+                          className="p-2 hover:bg-red-100 rounded-lg transition-all flex-shrink-0"
                           title="ลบห้อง"
                         >
-                          <X className="w-4 h-4 text-red-600" />
+                          <X className="w-5 h-5 text-red-600" />
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-between gap-3">
+                      {/* Room ID and Action */}
+                      <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-200">
                         <div className="flex items-center gap-3">
-                          <div className="px-4 py-2 bg-white border border-slate-300 rounded-xl">
+                          <div className="px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl">
                             <p className="text-xs text-slate-500 font-bold mb-1">Room ID</p>
-                            <p className="text-xl font-black text-[#1D324B] tracking-wider">{room.id}</p>
+                            <p className="text-lg font-black text-[#1D324B] tracking-wider">{room.id}</p>
                           </div>
                           <button
                             onClick={() => handleCopyRoomId(room.id)}
-                            className="p-3 bg-white hover:bg-blue-50 border-2 border-slate-300 hover:border-blue-400 rounded-xl transition-all"
+                            className="p-3 bg-white hover:bg-slate-50 border-2 border-slate-300 hover:border-[#1D324B] rounded-xl transition-all"
                             title="คัดลอก Room ID"
                           >
                             {copiedRoomId === room.id ? (
@@ -410,7 +441,7 @@ export default function RoomLobby(): React.ReactElement {
 
                         <button
                           onClick={() => handleEnterRoom(room.id)}
-                          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-black rounded-xl transition-all flex items-center gap-2"
+                          className="px-6 py-3 bg-[#1D324B] hover:bg-[#152238] text-white font-black rounded-xl transition-all flex items-center gap-2 shadow-md"
                         >
                           เข้าห้อง
                           <ArrowRight className="w-5 h-5" />

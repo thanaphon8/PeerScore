@@ -151,20 +151,28 @@ export default function App(): React.ReactElement {
     const groupIdFromUrl = searchParams.get('userGroupId');
     if (groupIdFromUrl) {
       setUserGroupId(groupIdFromUrl);
+      
+      // Load submitted groups for this specific groupId from URL
+      if (parsedUserData.userType === 'student') {
+        const storedSubmissions = localStorage.getItem(`submissions_${groupIdFromUrl}`);
+        if (storedSubmissions) {
+          setSubmittedGroups(JSON.parse(storedSubmissions));
+        } else {
+          setSubmittedGroups([]); // Reset if no submissions for this group
+        }
+      }
     } else {
       // For teachers, set to first group or teacher's group
       if (parsedUserData.userType === 'teacher') {
         setUserGroupId(parsedUserData.groupId || 'teacher');
       } else {
         setUserGroupId(parsedUserData.groupId);
-      }
-    }
-
-    // Load submitted groups from localStorage
-    if (parsedUserData.userType === 'student') {
-      const storedSubmissions = localStorage.getItem(`submissions_${parsedUserData.groupId}`);
-      if (storedSubmissions) {
-        setSubmittedGroups(JSON.parse(storedSubmissions));
+        
+        // Load submitted groups for userData.groupId
+        const storedSubmissions = localStorage.getItem(`submissions_${parsedUserData.groupId}`);
+        if (storedSubmissions) {
+          setSubmittedGroups(JSON.parse(storedSubmissions));
+        }
       }
     }
 
@@ -179,24 +187,44 @@ export default function App(): React.ReactElement {
 
   // Count total students (for teacher view)
   const getTotalStudents = (): number => {
+    // Check if we're on client side
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return 0;
+    }
+    
     // In real app, this would come from database
     // For now, count from localStorage
     let studentCount = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('submissions_')) {
-        studentCount++;
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('submissions_')) {
+          studentCount++;
+        }
       }
+      return Math.max(studentCount, projectGroups.reduce((acc, g) => acc + g.members.length, 0));
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
+      return 0;
     }
-    return Math.max(studentCount, projectGroups.reduce((acc, g) => acc + g.members.length, 0));
   };
 
   const totalStudents = getTotalStudents();
 
   // Get all evaluations for teacher
   const getAllEvaluations = () => {
-    const evaluationsStr = localStorage.getItem('evaluations');
-    return evaluationsStr ? JSON.parse(evaluationsStr) : [];
+    // Check if we're on client side
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return [];
+    }
+    
+    try {
+      const evaluationsStr = localStorage.getItem('evaluations');
+      return evaluationsStr ? JSON.parse(evaluationsStr) : [];
+    } catch (error) {
+      console.error('Error accessing evaluations:', error);
+      return [];
+    }
   };
 
   const totalEvaluations = userData?.userType === 'teacher' ? getAllEvaluations().length : 0;
@@ -319,24 +347,23 @@ export default function App(): React.ReactElement {
                 
                 <div className="flex flex-col">
                   <span className="text-xl font-black text-[#1D324B] tracking-tight">{userData.name}</span>
-                  <div className="mt-1 flex flex-col gap-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-slate-400 text-[9px] uppercase tracking-widest font-black">Group:</span>
-                      <span className="text-[#1D324B] text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 rounded">{currentUserGroup?.groupName || 'No Group'}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               <div className="text-center">
                 <h1 className="text-3xl font-black text-[#1D324B] italic tracking-tighter uppercase">Group Evaluation</h1>
-                {roomName && (
-                  <p className="text-sm font-bold text-slate-600 mt-1">{roomName}</p>
-                )}
               </div>
               
-              {/* Room ID Display */}
-              <div className="flex items-center gap-3">
+              {/* Room Name and Room ID Display */}
+              <div className="flex flex-col items-end gap-2">
+                {/* Room Name */}
+                {roomName && (
+                  <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
+                    <span className="text-lg font-black text-[#1D324B] tracking-tight">{roomName}</span>
+                  </div>
+                )}
+                
+                {/* Room ID */}
                 {roomId && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl">
                     <span className="text-xs font-black text-slate-600 uppercase">Room ID:</span>
@@ -617,7 +644,11 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
+    // DON'T clear old submission data - allow user to evaluate their previous group
+    // The key is to NOT mark the old group as submitted automatically
+    
     onClose();
+    // Navigate to main page
     router.push(`/?userGroupId=${newGroupId}&roomId=${roomId}`);
     onGroupCreated();
   };

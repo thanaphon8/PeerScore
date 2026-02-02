@@ -21,7 +21,6 @@ interface UserData {
   name: string;
   avatar: string;
   userType: 'student' | 'teacher';
-  groupId?: string;
 }
 
 const PROJECT_GROUPS: ProjectGroup[] = [
@@ -118,11 +117,8 @@ export default function SelectGroupPage(): React.ReactElement {
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
-    // Clear old submission data when changing groups
-    const oldGroupId = userData.groupId;
-    if (oldGroupId && oldGroupId !== selectedGroupId) {
-      localStorage.removeItem(`submissions_${oldGroupId}`);
-    }
+    // DON'T clear old submission data - allow user to evaluate their previous group
+    // The old code cleared submissions which prevented evaluation
 
     // Navigate to main page
     router.push(`/?userGroupId=${selectedGroupId}&roomId=${roomId}`);

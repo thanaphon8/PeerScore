@@ -93,6 +93,7 @@ export default function ProfilePage(): React.ReactElement {
   const [showGroupPicker, setShowGroupPicker] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [projectGroups] = useState<ProjectGroup[]>(PROJECT_GROUPS);
+  const [roomId, setRoomId] = useState<string | null>(null);
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('userData');
@@ -106,6 +107,22 @@ export default function ProfilePage(): React.ReactElement {
     setName(parsedUserData.name);
     setSelectedAvatar(parsedUserData.avatar);
     setSelectedGroupId(parsedUserData.groupId);
+
+    // Get roomId from URL or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomIdFromUrl = urlParams.get('roomId');
+    if (roomIdFromUrl) {
+      setRoomId(roomIdFromUrl);
+    } else {
+      // Try to get from user's last accessed room
+      const rooms = localStorage.getItem(`rooms_${parsedUserData.name}`);
+      if (rooms) {
+        const roomsList = JSON.parse(rooms);
+        if (roomsList.length > 0) {
+          setRoomId(roomsList[roomsList.length - 1].id);
+        }
+      }
+    }
   }, [router]);
 
   const handleSave = async (): Promise<void> => {
@@ -131,8 +148,12 @@ export default function ProfilePage(): React.ReactElement {
     setUserData(updatedUserData);
     setIsSaving(false);
 
-    // Redirect back to main page with the new group
-    router.push(`/?userGroupId=${selectedGroupId}`);
+    // Redirect back to main page with the new group and roomId
+    if (roomId) {
+      router.push(`/?userGroupId=${selectedGroupId}&roomId=${roomId}`);
+    } else {
+      router.push(`/?userGroupId=${selectedGroupId}`);
+    }
   };
 
   const handleLogout = (): void => {
@@ -165,7 +186,7 @@ export default function ProfilePage(): React.ReactElement {
       
       <div className="relative z-10 max-w-4xl mx-auto pt-8">
         <button 
-          onClick={() => router.push(`/?userGroupId=${userData.groupId}`)}
+          onClick={() => roomId ? router.push(`/?userGroupId=${userData.groupId}&roomId=${roomId}`) : router.push(`/?userGroupId=${userData.groupId}`)}
           className="flex items-center gap-2 text-slate-600 hover:text-[#1D324B] mb-8 font-black text-xs uppercase tracking-widest transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
