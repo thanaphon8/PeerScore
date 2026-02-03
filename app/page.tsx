@@ -501,6 +501,26 @@ export default function App(): React.ReactElement {
                         <Users className="w-4 h-4" />
                         เปลี่ยนกลุ่ม
                       </button>
+                      <button
+                        onClick={() => setIsEditMode(!isEditMode)}
+                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md ${
+                          isEditMode 
+                            ? 'bg-red-600 hover:bg-red-700 text-white' 
+                            : 'bg-slate-200 hover:bg-slate-300 text-[#1D324B]'
+                        }`}
+                      >
+                        {isEditMode ? (
+                          <>
+                            <Trash2 className="w-4 h-4" />
+                            โหมดลบ
+                          </>
+                        ) : (
+                          <>
+                            <Edit3 className="w-4 h-4" />
+                            จัดการกลุ่ม
+                          </>
+                        )}
+                      </button>
                     </>
                   )}
                 </div>
@@ -521,14 +541,13 @@ export default function App(): React.ReactElement {
                                    'bg-black/20';
 
                   return (
-                    <button
+                    <div
                       key={group.id}
-                      onClick={() => handleSelectGroup(group)}
-                      disabled={hasBeenEvaluated && !isOwnGroup && !isTeacher}
-                      className={`group relative border rounded-3xl text-left transition-all duration-300 shadow-xl overflow-hidden flex flex-col h-full hover:scale-[1.02] ${cardBg} ${hasBeenEvaluated && !isOwnGroup && !isTeacher ? 'cursor-not-allowed' : ''}`}
+                      onClick={() => !isEditMode && handleSelectGroup(group)}
+                      className={`group relative border rounded-3xl text-left transition-all duration-300 shadow-xl overflow-hidden flex flex-col h-full hover:scale-[1.02] ${cardBg} ${hasBeenEvaluated && !isOwnGroup && !isTeacher ? 'cursor-not-allowed' : isEditMode ? 'cursor-default' : 'cursor-pointer'}`}
                     >
-                      {/* Delete Button for Teachers in Edit Mode (only for custom groups) */}
-                      {isTeacher && isEditMode && !PROJECT_GROUPS.some(pg => pg.id === group.id) && (
+                      {/* Delete Button for Teachers and Students in Edit Mode (only for custom groups) */}
+                      {isEditMode && !PROJECT_GROUPS.some(pg => pg.id === group.id) && (
                         <button
                           onClick={(e) => handleDeleteGroup(group.id, e)}
                           className="absolute top-2 left-2 z-30 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition-all"
@@ -621,7 +640,7 @@ export default function App(): React.ReactElement {
                             </div>
                         </div>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
