@@ -13,7 +13,9 @@ import {
   Settings,
   User,
   Copy,
-  Plus
+  Plus,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 
 // --- Types ---
@@ -91,6 +93,7 @@ export default function App(): React.ReactElement {
   const [copiedRoomId, setCopiedRoomId] = useState<boolean>(false);
   const [roomName, setRoomName] = useState<string>('');
   const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -264,6 +267,31 @@ export default function App(): React.ReactElement {
     }
   };
 
+  const handleDeleteGroup = (groupId: string, event: React.MouseEvent): void => {
+    event.stopPropagation(); // Prevent card click
+    if (!confirm('คุณแน่ใจหรือไม่ที่จะลบกลุ่มนี้?')) return;
+    
+    // Remove from custom groups in localStorage
+    const storedGroups = localStorage.getItem('projectGroups');
+    if (storedGroups) {
+      const customGroups = JSON.parse(storedGroups);
+      const updatedGroups = customGroups.filter((g: ProjectGroup) => g.id !== groupId);
+      localStorage.setItem('projectGroups', JSON.stringify(updatedGroups));
+      
+      // Update displayed groups
+      const newAllGroups = [...PROJECT_GROUPS, ...updatedGroups];
+      setProjectGroups(newAllGroups);
+    }
+    
+    // Also remove evaluations for this group
+    const evaluationsStr = localStorage.getItem('evaluations');
+    if (evaluationsStr) {
+      const evaluations = JSON.parse(evaluationsStr);
+      const updatedEvaluations = evaluations.filter((e: any) => e.groupId !== groupId);
+      localStorage.setItem('evaluations', JSON.stringify(updatedEvaluations));
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
@@ -433,24 +461,49 @@ export default function App(): React.ReactElement {
                   <h2 className="text-sm font-bold text-[#1D324B] uppercase tracking-tight">Project Groups List</h2>
                 </div>
                 
-                {userData?.userType === 'student' && roomId && (
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
+                  {userData?.userType === 'teacher' && (
                     <button
-                      onClick={() => setShowCreateGroupModal(true)}
-                      className="px-4 py-2 bg-[#1D324B] hover:bg-[#152238] text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
+                      onClick={() => setIsEditMode(!isEditMode)}
+                      className={`px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md ${
+                        isEditMode 
+                          ? 'bg-red-600 hover:bg-red-700 text-white' 
+                          : 'bg-slate-200 hover:bg-slate-300 text-[#1D324B]'
+                      }`}
                     >
-                      <Plus className="w-4 h-4" />
-                      สร้างกลุ่มใหม่
+                      {isEditMode ? (
+                        <>
+                          <Trash2 className="w-4 h-4" />
+                          โหมดลบ
+                        </>
+                      ) : (
+                        <>
+                          <Edit3 className="w-4 h-4" />
+                          จัดการกลุ่ม
+                        </>
+                      )}
                     </button>
-                    <button
-                      onClick={() => router.push(`/select-group?roomId=${roomId}`)}
-                      className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
-                    >
-                      <Users className="w-4 h-4" />
-                      เปลี่ยนกลุ่ม
-                    </button>
-                  </div>
-                )}
+                  )}
+                  
+                  {userData?.userType === 'student' && roomId && (
+                    <>
+                      <button
+                        onClick={() => setShowCreateGroupModal(true)}
+                        className="px-4 py-2 bg-[#1D324B] hover:bg-[#152238] text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
+                      >
+                        <Plus className="w-4 h-4" />
+                        สร้างกลุ่มใหม่
+                      </button>
+                      <button
+                        onClick={() => router.push(`/select-group?roomId=${roomId}`)}
+                        className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-md"
+                      >
+                        <Users className="w-4 h-4" />
+                        เปลี่ยนกลุ่ม
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -474,6 +527,17 @@ export default function App(): React.ReactElement {
                       disabled={hasBeenEvaluated && !isOwnGroup && !isTeacher}
                       className={`group relative border rounded-3xl text-left transition-all duration-300 shadow-xl overflow-hidden flex flex-col h-full hover:scale-[1.02] ${cardBg} ${hasBeenEvaluated && !isOwnGroup && !isTeacher ? 'cursor-not-allowed' : ''}`}
                     >
+                      {/* Delete Button for Teachers in Edit Mode (only for custom groups) */}
+                      {isTeacher && isEditMode && !PROJECT_GROUPS.some(pg => pg.id === group.id) && (
+                        <button
+                          onClick={(e) => handleDeleteGroup(group.id, e)}
+                          className="absolute top-2 left-2 z-30 p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-lg transition-all"
+                          title="ลบกลุ่ม"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      
                       {isOwnGroup && !isTeacher && (
                         <div className="absolute top-2 right-2 px-5 py-2.5 bg-white text-amber-600 text-[11px] font-black uppercase rounded-3xl shadow-lg z-20 border border-amber-100 flex items-center gap-1.5">
                           <Crown className="w-3.5 h-3.5 fill-current" />

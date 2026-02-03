@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, 
@@ -9,8 +9,18 @@ import {
   Users,
   Plus,
   Check,
-  GraduationCap
+  GraduationCap,
+  Trash2,
+  History
 } from 'lucide-react';
+
+interface SavedProfile {
+  name: string;
+  avatar: string;
+  groupId: string;
+  groupName?: string;
+  lastLogin: string;
+}
 
 interface ProjectGroup {
   id: string;
@@ -73,23 +83,97 @@ export default function StudentLoginPage(): React.ReactElement {
   const [step, setStep] = useState<1 | 2>(1);
   const [studentName, setStudentName] = useState<string>('');
   const [selectedAvatar, setSelectedAvatar] = useState<string>(AVATAR_SEEDS[0]);
+  const [savedProfiles, setSavedProfiles] = useState<SavedProfile[]>([]);
+
+  useEffect(() => {
+    // Load saved profiles from localStorage
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const profiles: SavedProfile[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('profile_')) {
+            const profileData = localStorage.getItem(key);
+            if (profileData) {
+              profiles.push(JSON.parse(profileData));
+            }
+          }
+        }
+        // Sort by last login (most recent first)
+        profiles.sort((a, b) => new Date(b.lastLogin).getTime() - new Date(a.lastLogin).getTime());
+        setSavedProfiles(profiles);
+      } catch (error) {
+        console.error('Error loading profiles:', error);
+      }
+    }
+  }, []);
 
   const handleNameSubmit = (): void => {
     if (studentName.trim()) {
+      // Check if profile already exists
+      const existingProfile = savedProfiles.find(p => p.name.toLowerCase() === studentName.trim().toLowerCase());
+      if (existingProfile) {
+        // Use existing profile
+        setSelectedAvatar(existingProfile.avatar);
+      }
       setStep(2);
     }
   };
 
   const handleLogin = (): void => {
+    // Check if profile already exists
+    const existingProfile = savedProfiles.find(p => p.name.toLowerCase() === studentName.trim().toLowerCase());
+    
     // Save user data to localStorage
     const userData = {
       name: studentName,
       avatar: selectedAvatar,
-      groupId: `student_${Date.now()}`, // Temporary ID, will select group later
+      groupId: existingProfile?.groupId || `student_${Date.now()}`, // Use existing groupId or create new
+      groupName: existingProfile?.groupName,
       userType: 'student'
     };
     localStorage.setItem('userData', JSON.stringify(userData));
+
+    // Save/Update profile for quick login
+    const profileData: SavedProfile = {
+      name: studentName,
+      avatar: selectedAvatar,
+      groupId: userData.groupId,
+      groupName: existingProfile?.groupName,
+      lastLogin: new Date().toISOString()
+    };
+    localStorage.setItem(`profile_${studentName}`, JSON.stringify(profileData));
+
     router.push('/room');
+  };
+
+  const handleQuickLogin = (profile: SavedProfile): void => {
+    const userData = {
+      name: profile.name,
+      avatar: profile.avatar,
+      groupId: profile.groupId,
+      groupName: profile.groupName,
+      userType: 'student'
+    };
+
+    localStorage.setItem('userData', JSON.stringify(userData));
+
+    // Update last login time
+    const updatedProfile: SavedProfile = {
+      ...profile,
+      lastLogin: new Date().toISOString()
+    };
+    localStorage.setItem(`profile_${profile.name}`, JSON.stringify(updatedProfile));
+
+    router.push('/room');
+  };
+
+  const handleDeleteProfile = (profileName: string, event: React.MouseEvent): void => {
+    event.stopPropagation();
+    if (!confirm(`คุณต้องการลบโปรไฟล์ "${profileName}" หรือไม่?`)) return;
+
+    localStorage.removeItem(`profile_${profileName}`);
+    setSavedProfiles(prev => prev.filter(p => p.name !== profileName));
   };
 
   return (
@@ -98,7 +182,10 @@ export default function StudentLoginPage(): React.ReactElement {
       <div className="absolute top-20 left-20 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
       
-      <div className="relative z-10 max-w-3xl w-full">
+      <div className="relative z-10 max-w-7xl w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Main Login Form */}
+          <div className={savedProfiles.length > 0 ? "lg:col-span-8" : "lg:col-span-12 max-w-3xl mx-auto w-full"}>
         <button 
           onClick={() => step === 1 ? router.push('/login') : setStep((step - 1) as 1 | 2)}
           className="flex items-center gap-2 text-slate-600 hover:text-[#1D324B] mb-8 font-black text-xs uppercase tracking-widest transition-colors group"
@@ -195,6 +282,64 @@ export default function StudentLoginPage(): React.ReactElement {
                 เข้าสู่ระบบ
                 <ChevronRight className="w-5 h-5" />
               </button>
+            </div>
+          )}
+        </div>
+          </div>
+
+          {/* Saved Profiles Sidebar - Right Side */}
+          {savedProfiles.length > 0 && (
+            <div className="lg:col-span-4">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl sticky top-6">
+                <div className="flex items-center gap-2 mb-6">
+                  <History className="w-5 h-5 text-[#1D324B]" />
+                  <h3 className="text-lg font-black text-[#1D324B]">เข้าสู่ระบบด่วน</h3>
+                </div>
+                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                  {savedProfiles.map((profile) => (
+                    <div
+                      key={profile.name}
+                      className="w-full p-4 bg-slate-50 hover:bg-blue-50 border-2 border-slate-200 hover:border-blue-400 rounded-2xl transition-all group relative cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div 
+                          onClick={() => handleQuickLogin(profile)}
+                          className="flex items-center gap-3 flex-1 cursor-pointer"
+                        >
+                          <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-slate-300 group-hover:border-blue-400 transition-colors flex-shrink-0">
+                            <img 
+                              src={getAvatarUrl(profile.avatar)} 
+                              alt={profile.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-[#1D324B] truncate">{profile.name}</p>
+                            {profile.groupName && (
+                              <p className="text-xs text-slate-500 font-medium truncate">{profile.groupName}</p>
+                            )}
+                            <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                              {new Date(profile.lastLogin).toLocaleDateString('th-TH', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteProfile(profile.name, e)}
+                          className="p-2 hover:bg-red-100 rounded-lg transition-colors flex-shrink-0"
+                          title="ลบโปรไฟล์"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -77,12 +77,14 @@ export default function FeedbackPage(): React.ReactElement {
     const rmId = searchParams.get('roomId');
     
     // Load all groups including custom ones
+    let loadedGroups = [...PROJECT_GROUPS];
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       try {
         const storedGroups = localStorage.getItem('projectGroups');
         if (storedGroups) {
           const customGroups = JSON.parse(storedGroups);
-          setAllGroups([...PROJECT_GROUPS, ...customGroups]);
+          loadedGroups = [...PROJECT_GROUPS, ...customGroups];
+          setAllGroups(loadedGroups);
         }
       } catch (error) {
         console.error('Error loading groups:', error);
@@ -90,7 +92,7 @@ export default function FeedbackPage(): React.ReactElement {
     }
     
     if (userGrpId) {
-      const group = allGroups.find(g => g.id === userGrpId);
+      const group = loadedGroups.find(g => g.id === userGrpId);
       if (group) {
         setSelectedGroup(group);
         setUserGroupId(userGrpId);
@@ -114,7 +116,7 @@ export default function FeedbackPage(): React.ReactElement {
         console.error('Error loading evaluations:', error);
       }
     }
-  }, [searchParams, allGroups]);
+  }, [searchParams]);
 
   const getAverageScore = (scores: Record<string, number>): number => {
     const values = Object.values(scores);
