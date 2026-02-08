@@ -1,0 +1,388 @@
+{
+  "students": [
+    {
+      "_id": "STD001",
+      "studentId": "6501234567",
+      "firstName": "สมชาย",
+      "lastName": "ใจดี",
+      "email": "somchai@university.ac.th",
+      "department": "วิทยาการคอมพิวเตอร์",
+      "faculty": "วิศวกรรมศาสตร์",
+      "year": 4,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "_id": "STD002",
+      "studentId": "6501234568",
+      "firstName": "สมหญิง",
+      "lastName": "สมหวัง",
+      "email": "somying@university.ac.th",
+      "department": "วิทยาการคอมพิวเตอร์",
+      "faculty": "วิศวกรรมศาสตร์",
+      "year": 4,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "_id": "STD003",
+      "studentId": "6501234569",
+      "firstName": "สุชาติ",
+      "lastName": "ศรีสวัสดิ์",
+      "email": "suchat@university.ac.th",
+      "department": "วิทยาการคอมพิวเตอร์",
+      "faculty": "วิศวกรรมศาสตร์",
+      "year": 4,
+      "createdAt": "2024-01-15T10:00:00Z"
+    }
+  ],
+  "evaluators": [
+    {
+      "_id": "ADV001",
+      "evaluatorId": "E001",
+      "title": "ผศ.ดร.",
+      "firstName": "วิชัย",
+      "lastName": "มั่นคง",
+      "position": "อาจารย์ที่ปรึกษา",
+      "department": "วิทยาการคอมพิวเตอร์",
+      "email": "wichai@university.ac.th",
+      "createdAt": "2023-06-01T08:00:00Z"
+    },
+    {
+      "_id": "ADV002",
+      "evaluatorId": "E002",
+      "title": "ผศ.",
+      "firstName": "สมเด็จ",
+      "lastName": "ปัญญา",
+      "position": "อาจารย์ที่ปรึกษา",
+      "department": "วิทยาการคอมพิวเตอร์",
+      "email": "somdet@university.ac.th",
+      "createdAt": "2023-06-01T08:00:00Z"
+    },
+    {
+      "_id": "COM001",
+      "evaluatorId": "C001",
+      "title": "ศ.",
+      "firstName": "สินธุ",
+      "lastName": "มหาศรี",
+      "position": "กรรมการสอบ",
+      "department": "วิทยาการคอมพิวเตอร์",
+      "email": "sinthu@university.ac.th",
+      "createdAt": "2023-06-01T08:00:00Z"
+    }
+  ],
+  "projects": [
+    {
+      "_id": "PRJ001",
+      "projectTitle": "ระบบจัดการคลังสินค้าอัจฉริยะ",
+      "projectType": "Software Development",
+      "studentIds": ["STD001", "STD002"],
+      "advisorId": "ADV001",
+      "academicYear": "2567",
+      "semester": 2,
+      "status": "completed",
+      "submittedDate": "2024-03-15T14:30:00Z",
+      "createdAt": "2024-01-20T09:00:00Z",
+      "updatedAt": "2024-03-15T14:30:00Z"
+    },
+    {
+      "_id": "PRJ002",
+      "projectTitle": "แอปพลิเคชันจองห้องค้นหารูมเมต",
+      "projectType": "Software Development",
+      "studentIds": ["STD003"],
+      "advisorId": "ADV002",
+      "academicYear": "2567",
+      "semester": 2,
+      "status": "completed",
+      "submittedDate": "2024-03-16T10:00:00Z",
+      "createdAt": "2024-01-21T09:00:00Z",
+      "updatedAt": "2024-03-16T10:00:00Z"
+    }
+  ],
+  "evaluations": [
+    {
+      "_id": "EVAL001",
+      "projectId": "PRJ001",
+      "evaluatorId": "ADV001",
+      "evaluationType": "advisor",
+      "evaluationDate": "2024-03-20T13:00:00Z",
+      "scores": {
+        "content": {
+          "clarity": 8.5,
+          "completeness": 9.0,
+          "relevance": 8.0,
+          "innovation": 7.5,
+          "subtotal": 33.0,
+          "maxScore": 40
+        },
+        "technical": {
+          "design": 8.0,
+          "implementation": 8.5,
+          "testing": 7.5,
+          "documentation": 9.0,
+          "subtotal": 33.0,
+          "maxScore": 40
+        },
+        "presentation": {
+          "delivery": 8.0,
+          "visualAids": 7.5,
+          "answeringQuestions": 8.5,
+          "timeManagement": 8.0,
+          "subtotal": 32.0,
+          "maxScore": 40
+        }
+      },
+      "totalScore": 98.0,
+      "maxTotalScore": 120,
+      "percentage": 81.67,
+      "grade": "A",
+      "comments": "โปรเจกต์มีความสมบูรณ์ดี มีนวัตกรรม แต่ควรปรับปรุงการทดสอบให้ครอบคลุมมากขึ้น",
+      "strengths": [
+        "การออกแบบระบบดีมาก",
+        "เอกสารครบถ้วนชัดเจน",
+        "การนำเสนอมั่นใจ"
+      ],
+      "improvements": [
+        "ควรเพิ่ม test cases",
+        "ควรมี error handling ที่ดีขึ้น"
+      ],
+      "status": "completed",
+      "createdAt": "2024-03-20T13:00:00Z",
+      "updatedAt": "2024-03-20T15:30:00Z"
+    },
+    {
+      "_id": "EVAL002",
+      "projectId": "PRJ001",
+      "evaluatorId": "COM001",
+      "evaluationType": "committee",
+      "evaluationDate": "2024-03-22T14:00:00Z",
+      "scores": {
+        "content": {
+          "clarity": 8.0,
+          "completeness": 8.5,
+          "relevance": 8.5,
+          "innovation": 8.0,
+          "subtotal": 33.0,
+          "maxScore": 40
+        },
+        "technical": {
+          "design": 8.5,
+          "implementation": 9.0,
+          "testing": 8.0,
+          "documentation": 8.5,
+          "subtotal": 34.0,
+          "maxScore": 40
+        },
+        "presentation": {
+          "delivery": 8.5,
+          "visualAids": 8.0,
+          "answeringQuestions": 9.0,
+          "timeManagement": 8.5,
+          "subtotal": 34.0,
+          "maxScore": 40
+        }
+      },
+      "totalScore": 101.0,
+      "maxTotalScore": 120,
+      "percentage": 84.17,
+      "grade": "A",
+      "comments": "โปรเจกต์นี้มีคุณภาพสูง ทั้งในด้านการออกแบบและการพัฒนา ควรเผยแพร่ผลงานเพิ่มเติม",
+      "strengths": [
+        "ระบบทำงานได้อย่างมีประสิทธิภาพ",
+        "การจัดการข้อมูลดีมาก",
+        "มีการทดสอบที่ดีพอสมควร"
+      ],
+      "improvements": [
+        "เพิ่มความเป็นระบบสำหรับขยายฟังก์ชัน",
+        "เพิ่มการจัดการข้อผิดพลาด"
+      ],
+      "status": "completed",
+      "createdAt": "2024-03-22T14:00:00Z",
+      "updatedAt": "2024-03-22T16:00:00Z"
+    },
+    {
+      "_id": "EVAL003",
+      "projectId": "PRJ002",
+      "evaluatorId": "ADV002",
+      "evaluationType": "advisor",
+      "evaluationDate": "2024-03-21T15:00:00Z",
+      "scores": {
+        "content": {
+          "clarity": 7.5,
+          "completeness": 8.0,
+          "relevance": 8.5,
+          "innovation": 8.0,
+          "subtotal": 32.0,
+          "maxScore": 40
+        },
+        "technical": {
+          "design": 7.5,
+          "implementation": 8.0,
+          "testing": 7.0,
+          "documentation": 8.5,
+          "subtotal": 31.0,
+          "maxScore": 40
+        },
+        "presentation": {
+          "delivery": 7.5,
+          "visualAids": 8.0,
+          "answeringQuestions": 8.0,
+          "timeManagement": 7.5,
+          "subtotal": 31.0,
+          "maxScore": 40
+        }
+      },
+      "totalScore": 94.0,
+      "maxTotalScore": 120,
+      "percentage": 78.33,
+      "grade": "B+",
+      "comments": "โปรเจกต์ดีและมีประโยชน์ ควรเพิ่มการทดสอบและการจัดการข้อผิดพลาดเพิ่มเติม",
+      "strengths": [
+        "ความเข้าใจปัญหาดี",
+        "วิธีแก้ปัญหาเหมาะสม",
+        "เอกสารสมบูรณ์"
+      ],
+      "improvements": [
+        "เพิ่ม unit tests",
+        "ปรับปรุง user interface",
+        "เพิ่มการตรวจสอบข้อมูล"
+      ],
+      "status": "completed",
+      "createdAt": "2024-03-21T15:00:00Z",
+      "updatedAt": "2024-03-21T17:00:00Z"
+    }
+  ],
+  "evaluationTemplate": {
+    "_id": "TMPL001",
+    "templateName": "แบบประเมินโปรเจกต์มาตรฐาน",
+    "evaluationType": "standard",
+    "categories": [
+      {
+        "categoryId": "content",
+        "categoryName": "เนื้อหาและความสมบูรณ์",
+        "weight": 40,
+        "criteria": [
+          {
+            "criteriaId": "clarity",
+            "criteriaName": "ความชัดเจนของปัญหาและวัตถุประสงค์",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "completeness",
+            "criteriaName": "ความสมบูรณ์ของเนื้อหา",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "relevance",
+            "criteriaName": "ความเหมาะสมและประโยชน์",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "innovation",
+            "criteriaName": "ความคิดสร้างสรรค์และนวัตกรรม",
+            "maxScore": 10
+          }
+        ]
+      },
+      {
+        "categoryId": "technical",
+        "categoryName": "ด้านเทคนิค",
+        "weight": 40,
+        "criteria": [
+          {
+            "criteriaId": "design",
+            "criteriaName": "การออกแบบระบบ",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "implementation",
+            "criteriaName": "การพัฒนาและใช้เทคโนโลยี",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "testing",
+            "criteriaName": "การทดสอบและแก้ไขปัญหา",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "documentation",
+            "criteriaName": "เอกสารทางเทคนิค",
+            "maxScore": 10
+          }
+        ]
+      },
+      {
+        "categoryId": "presentation",
+        "categoryName": "การนำเสนอ",
+        "weight": 20,
+        "criteria": [
+          {
+            "criteriaId": "delivery",
+            "criteriaName": "ทักษะการนำเสนอ",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "visualAids",
+            "criteriaName": "สื่อการนำเสนอ",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "answeringQuestions",
+            "criteriaName": "การตอบคำถาม",
+            "maxScore": 10
+          },
+          {
+            "criteriaId": "timeManagement",
+            "criteriaName": "การบริหารเวลา",
+            "maxScore": 10
+          }
+        ]
+      }
+    ],
+    "totalMaxScore": 120,
+    "passingScore": 60,
+    "gradeScale": [
+      {
+        "grade": "A",
+        "minScore": 80,
+        "maxScore": 100
+      },
+      {
+        "grade": "B+",
+        "minScore": 75,
+        "maxScore": 79.99
+      },
+      {
+        "grade": "B",
+        "minScore": 70,
+        "maxScore": 74.99
+      },
+      {
+        "grade": "C+",
+        "minScore": 65,
+        "maxScore": 69.99
+      },
+      {
+        "grade": "C",
+        "minScore": 60,
+        "maxScore": 64.99
+      },
+      {
+        "grade": "D+",
+        "minScore": 55,
+        "maxScore": 59.99
+      },
+      {
+        "grade": "D",
+        "minScore": 50,
+        "maxScore": 54.99
+      },
+      {
+        "grade": "F",
+        "minScore": 0,
+        "maxScore": 49.99
+      }
+    ],
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+}
