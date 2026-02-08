@@ -1,7 +1,6 @@
 {
   "students": [
     {
-      "_id": "STD001",
       "studentId": "6501234567",
       "firstName": "สมชาย",
       "lastName": "ใจดี",
@@ -12,7 +11,6 @@
       "createdAt": "2024-01-15T10:00:00Z"
     },
     {
-      "_id": "STD002",
       "studentId": "6501234568",
       "firstName": "สมหญิง",
       "lastName": "สมหวัง",
@@ -23,7 +21,6 @@
       "createdAt": "2024-01-15T10:00:00Z"
     },
     {
-      "_id": "STD003",
       "studentId": "6501234569",
       "firstName": "สุชาติ",
       "lastName": "ศรีสวัสดิ์",
@@ -36,7 +33,6 @@
   ],
   "evaluators": [
     {
-      "_id": "ADV001",
       "evaluatorId": "E001",
       "title": "ผศ.ดร.",
       "firstName": "วิชัย",
@@ -47,7 +43,6 @@
       "createdAt": "2023-06-01T08:00:00Z"
     },
     {
-      "_id": "ADV002",
       "evaluatorId": "E002",
       "title": "ผศ.",
       "firstName": "สมเด็จ",
@@ -58,7 +53,6 @@
       "createdAt": "2023-06-01T08:00:00Z"
     },
     {
-      "_id": "COM001",
       "evaluatorId": "C001",
       "title": "ศ.",
       "firstName": "สินธุ",
@@ -71,7 +65,6 @@
   ],
   "projects": [
     {
-      "_id": "PRJ001",
       "projectTitle": "ระบบจัดการคลังสินค้าอัจฉริยะ",
       "projectType": "Software Development",
       "studentIds": ["STD001", "STD002"],
@@ -84,7 +77,6 @@
       "updatedAt": "2024-03-15T14:30:00Z"
     },
     {
-      "_id": "PRJ002",
       "projectTitle": "แอปพลิเคชันจองห้องค้นหารูมเมต",
       "projectType": "Software Development",
       "studentIds": ["STD003"],
@@ -99,9 +91,8 @@
   ],
   "evaluations": [
     {
-      "_id": "EVAL001",
-      "projectId": "PRJ001",
-      "evaluatorId": "ADV001",
+      "projectTitle": "ระบบจัดการคลังสินค้าอัจฉริยะ",
+      "evaluatorId": "E001",
       "evaluationType": "advisor",
       "evaluationDate": "2024-03-20T13:00:00Z",
       "scores": {
@@ -149,9 +140,8 @@
       "updatedAt": "2024-03-20T15:30:00Z"
     },
     {
-      "_id": "EVAL002",
-      "projectId": "PRJ001",
-      "evaluatorId": "COM001",
+      "projectTitle": "ระบบจัดการคลังสินค้าอัจฉริยะ",
+      "evaluatorId": "C001",
       "evaluationType": "committee",
       "evaluationDate": "2024-03-22T14:00:00Z",
       "scores": {
@@ -199,9 +189,8 @@
       "updatedAt": "2024-03-22T16:00:00Z"
     },
     {
-      "_id": "EVAL003",
-      "projectId": "PRJ002",
-      "evaluatorId": "ADV002",
+      "projectTitle": "แอปพลิเคชันจองห้องค้นหารูมเมต",
+      "evaluatorId": "E002",
       "evaluationType": "advisor",
       "evaluationDate": "2024-03-21T15:00:00Z",
       "scores": {
@@ -251,7 +240,6 @@
     }
   ],
   "evaluationTemplate": {
-    "_id": "TMPL001",
     "templateName": "แบบประเมินโปรเจกต์มาตรฐาน",
     "evaluationType": "standard",
     "categories": [
