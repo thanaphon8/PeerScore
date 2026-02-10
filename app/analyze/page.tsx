@@ -28,6 +28,7 @@ interface ProjectGroup {
   groupName: string;
   projectName: string;
   members: string[];
+  memberProfiles?: Array<{ name: string; avatar: string }>;
 }
 
 interface CriteriaStats {
@@ -241,8 +242,8 @@ export default function AnalyzePage(): React.ReactElement {
         return [userData.name, ...group.members];
       }
     }
-    // Not user's group - show group name and members
-    return [group.groupName, ...group.members];
+    // Not user's group - just show members (no group name)
+    return group.members;
   };
 
   const isUserMember = (index: number): boolean => {
@@ -264,6 +265,13 @@ export default function AnalyzePage(): React.ReactElement {
       if (storedUserData) {
         const userData = JSON.parse(storedUserData);
         return getRandomProfileImage(userData.avatar);
+      }
+    }
+    // Check if memberProfiles exist and get avatar
+    if (selectedGroup?.memberProfiles) {
+      const profile = selectedGroup.memberProfiles.find(p => p.name === member);
+      if (profile) {
+        return getRandomProfileImage(profile.avatar);
       }
     }
     // Otherwise use member name for avatar
