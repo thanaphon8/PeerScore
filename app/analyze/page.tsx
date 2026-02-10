@@ -42,7 +42,13 @@ interface GroupStats {
   totalEvaluators: number;
   statsByCriteria: CriteriaStats[];
   overallAverage: number;
-  comments: Array<{text: string, from: string, date: string}>;
+  comments: Array<{
+    text: string;
+    from: string;
+    avatar?: string;
+    isTeacher?: boolean;
+    date: string;
+  }>;
 }
 
 const EVALUATION_CRITERIA: Criteria[] = [
@@ -117,6 +123,29 @@ export default function AnalyzePage(): React.ReactElement {
         allGroups = [...PROJECT_GROUPS, ...customGroups];
       }
       
+      // Load room-specific member profiles
+      if (rmId) {
+        const roomMembersKey = `roomMembers_${rmId}`;
+        const storedRoomMembers = localStorage.getItem(roomMembersKey);
+        if (storedRoomMembers) {
+          const roomMembers = JSON.parse(storedRoomMembers);
+          
+          // Update groups with room-specific member data
+          allGroups = allGroups.map(group => {
+            if (roomMembers[group.id]) {
+              return {
+                ...group,
+                memberProfiles: roomMembers[group.id],
+                members: roomMembers[group.id].map((m: any) => 
+                  typeof m === 'string' ? m : m.name
+                )
+              };
+            }
+            return group;
+          });
+        }
+      }
+      
       const group = allGroups.find(g => g.id === userGrpId);
       if (group) {
         setSelectedGroup(group);
@@ -162,10 +191,26 @@ export default function AnalyzePage(): React.ReactElement {
           }
           
           realComments = groupEvaluations.map((e: any) => {
-            const evaluatorGroup = allGroups.find(g => g.id === e.evaluatorGroupId);
+            // Check if evaluator is a teacher
+            const isTeacher = e.evaluatorType === 'teacher';
+            let displayName = 'Unknown';
+            let avatar = 'default';
+            
+            if (isTeacher) {
+              // Teacher: Show real name and avatar
+              displayName = e.evaluatorName || 'ครู';
+              avatar = e.evaluatorAvatar || 'default';
+            } else {
+              // Student: Show group name (anonymous)
+              const evaluatorGroup = allGroups.find(g => g.id === e.evaluatorGroupId);
+              displayName = evaluatorGroup?.groupName || 'Unknown Group';
+            }
+            
             return {
               text: e.comment,
-              from: evaluatorGroup?.groupName || 'Unknown Group',
+              from: displayName,
+              avatar: avatar,
+              isTeacher: isTeacher,
               date: new Date(e.timestamp).toLocaleDateString('th-TH', {
                 month: 'short',
                 day: 'numeric'
@@ -404,8 +449,24 @@ export default function AnalyzePage(): React.ReactElement {
                               </p>
                               <div className="mt-4 flex items-center justify-between pl-2">
                                   <div className="flex items-center gap-2">
-                                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{comment.from}</span>
+                                      {comment.isTeacher && comment.avatar ? (
+                                        <>
+                                          <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-300">
+                                            <img 
+                                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.avatar}`} 
+                                              alt={comment.from}
+                                              className="w-full h-full object-cover"
+                                            />
+                                          </div>
+                                          <span className="text-xs font-black text-[#1D324B]">{comment.from}</span>
+                                          <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded-full uppercase">ครู</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{comment.from}</span>
+                                        </>
+                                      )}
                                   </div>
                                   <span className="text-[9px] text-slate-400 font-medium">{comment.date}</span>
                               </div>

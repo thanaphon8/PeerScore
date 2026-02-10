@@ -117,6 +117,40 @@ export default function SelectGroupPage(): React.ReactElement {
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
+    // Update room-specific member assignments with profiles
+    const roomMembersKey = `roomMembers_${roomId}`;
+    const storedRoomMembers = localStorage.getItem(roomMembersKey);
+    const roomMembers: { [groupId: string]: any[] } = storedRoomMembers ? JSON.parse(storedRoomMembers) : {};
+    
+    const currentUserProfile = {
+      name: userData.name,
+      avatar: userData.avatar || 'default'
+    };
+    
+    // Remove user from all groups
+    Object.keys(roomMembers).forEach(groupId => {
+      roomMembers[groupId] = roomMembers[groupId].filter((m: any) => {
+        // Handle both old format (string) and new format (object)
+        const memberName = typeof m === 'string' ? m : m.name;
+        return memberName !== userData.name;
+      });
+    });
+    
+    // Add user to selected group
+    if (!roomMembers[selectedGroupId]) {
+      roomMembers[selectedGroupId] = [];
+    }
+    const existsInGroup = roomMembers[selectedGroupId].some((m: any) => {
+      const memberName = typeof m === 'string' ? m : m.name;
+      return memberName === userData.name;
+    });
+    if (!existsInGroup) {
+      roomMembers[selectedGroupId].push(currentUserProfile);
+    }
+    
+    // Save updated room members
+    localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
+
     // DON'T clear old submission data - allow user to evaluate their previous group
     // The old code cleared submissions which prevented evaluation
 

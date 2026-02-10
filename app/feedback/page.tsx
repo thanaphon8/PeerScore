@@ -12,6 +12,9 @@ import {
 interface Evaluation {
   groupId: string;
   evaluatorGroupId: string;
+  evaluatorType?: 'teacher' | 'student';
+  evaluatorName?: string;
+  evaluatorAvatar?: string;
   scores: Record<string, number>;
   comment: string;
   timestamp: string;
@@ -227,10 +230,26 @@ export default function FeedbackPage(): React.ReactElement {
                     </p>
                   </div>
 
-                  {/* Anonymous Badge */}
-                  <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
-                    <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
-                    <span className="font-bold uppercase tracking-wider">ไม่เปิดเผยตัวตน</span>
+                  {/* Evaluator Info - Show teacher name/avatar or anonymous */}
+                  <div className="mt-3 flex items-center gap-2 text-xs">
+                    {feedback.evaluatorType === 'teacher' && feedback.evaluatorName ? (
+                      <>
+                        <div className="w-6 h-6 rounded-full overflow-hidden border border-slate-300">
+                          <img 
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${feedback.evaluatorAvatar || 'default'}`}
+                            alt={feedback.evaluatorName}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="font-black text-[#1D324B]">{feedback.evaluatorName}</span>
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded-full uppercase">ครู</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300"></div>
+                        <span className="font-bold uppercase tracking-wider text-slate-400">ไม่เปิดเผยตัวตน</span>
+                      </>
+                    )}
                   </div>
                 </div>
               );

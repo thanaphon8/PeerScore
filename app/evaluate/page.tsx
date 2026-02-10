@@ -147,10 +147,18 @@ export default function EvaluatePage(): React.ReactElement {
     if (!selectedGroup) return;
     if (Object.keys(scores).length < EVALUATION_CRITERIA.length) return;
     
+    // Get user data to check if teacher
+    const userData = localStorage.getItem('userData');
+    const userInfo = userData ? JSON.parse(userData) : null;
+    const isTeacher = userInfo?.userType === 'teacher';
+    
     // Save evaluation data
     const evaluationData = {
       groupId: selectedGroup.id,
       evaluatorGroupId: userGroupId,
+      evaluatorType: isTeacher ? 'teacher' : 'student',
+      evaluatorName: isTeacher ? userInfo.name : undefined,
+      evaluatorAvatar: isTeacher ? userInfo.avatar : undefined,
       scores,
       comment,
       timestamp: new Date().toISOString()
@@ -162,8 +170,8 @@ export default function EvaluatePage(): React.ReactElement {
     evaluations.push(evaluationData);
     localStorage.setItem('evaluations', JSON.stringify(evaluations));
     
-    // Update submitted groups for this user
-    if (userGroupId) {
+    // Update submitted groups for this user (only for students)
+    if (userGroupId && !isTeacher) {
       const submittedKey = `submissions_${userGroupId}`;
       const existingSubmissions = localStorage.getItem(submittedKey) || '[]';
       const submissions = JSON.parse(existingSubmissions);

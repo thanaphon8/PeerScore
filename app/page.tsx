@@ -19,11 +19,17 @@ import {
 } from 'lucide-react';
 
 // --- Types ---
+interface MemberProfile {
+  name: string;
+  avatar: string;
+}
+
 interface ProjectGroup {
   id: string;
   groupName: string;
   projectName: string;
-  members: string[];
+  members: string[]; // For backward compatibility
+  memberProfiles?: MemberProfile[]; // Full member data with avatars
 }
 
 interface UserData {
@@ -35,6 +41,7 @@ interface UserData {
   projectName?: string;
   isNewGroup?: boolean;
   newMembers?: string[];
+  newMemberProfiles?: MemberProfile[];
 }
 
 const PROJECT_GROUPS: ProjectGroup[] = [
@@ -131,13 +138,31 @@ export default function App(): React.ReactElement {
       allGroups = [...PROJECT_GROUPS, ...customGroups];
     }
 
+    // Load room-specific member assignments
+    const roomMembersKey = `roomMembers_${roomIdFromUrl}`;
+    const storedRoomMembers = localStorage.getItem(roomMembersKey);
+    const roomMembers: { [groupId: string]: MemberProfile[] } = storedRoomMembers ? JSON.parse(storedRoomMembers) : {};
+
+    // Update group members with room-specific data
+    allGroups = allGroups.map(group => {
+      if (roomMembers[group.id]) {
+        return { 
+          ...group, 
+          memberProfiles: roomMembers[group.id],
+          members: roomMembers[group.id].map(m => m.name)
+        };
+      }
+      return group;
+    });
+
     // If user created a new group, add it to the groups list
     if (parsedUserData.isNewGroup && parsedUserData.groupName && parsedUserData.projectName) {
       const newGroup: ProjectGroup = {
         id: parsedUserData.groupId,
         groupName: parsedUserData.groupName,
         projectName: parsedUserData.projectName,
-        members: parsedUserData.newMembers || []
+        members: parsedUserData.newMembers || [],
+        memberProfiles: parsedUserData.newMemberProfiles || []
       };
       
       const groupExists = allGroups.some(g => g.id === newGroup.id);
@@ -146,6 +171,54 @@ export default function App(): React.ReactElement {
         // Save all groups
         const customOnly = allGroups.filter(g => !PROJECT_GROUPS.some(pg => pg.id === g.id));
         localStorage.setItem('projectGroups', JSON.stringify(customOnly));
+        
+        // Save room-specific members with full profiles
+        roomMembers[newGroup.id] = newGroup.memberProfiles || [];
+        localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
+      }
+    }
+
+    // Update room members if user has changed groups
+    if (parsedUserData.groupId && parsedUserData.name) {
+      let membersUpdated = false;
+      
+      const currentUserProfile: MemberProfile = {
+        name: parsedUserData.name,
+        avatar: parsedUserData.avatar || 'default'
+      };
+      
+      // Remove user from all groups first
+      Object.keys(roomMembers).forEach(groupId => {
+        roomMembers[groupId] = roomMembers[groupId].filter(m => m.name !== parsedUserData.name);
+        if (roomMembers[groupId].length !== (roomMembers[groupId] || []).length) {
+          membersUpdated = true;
+        }
+      });
+      
+      // Add user to their current group
+      if (!roomMembers[parsedUserData.groupId]) {
+        roomMembers[parsedUserData.groupId] = [];
+      }
+      if (!roomMembers[parsedUserData.groupId].some(m => m.name === parsedUserData.name)) {
+        roomMembers[parsedUserData.groupId].push(currentUserProfile);
+        membersUpdated = true;
+      }
+      
+      // Save updated room members
+      if (membersUpdated) {
+        localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
+        
+        // Update allGroups with new member data
+        allGroups = allGroups.map(group => {
+          if (roomMembers[group.id]) {
+            return { 
+              ...group, 
+              memberProfiles: roomMembers[group.id],
+              members: roomMembers[group.id].map(m => m.name)
+            };
+          }
+          return group;
+        });
       }
     }
 
@@ -196,16 +269,26 @@ export default function App(): React.ReactElement {
     }
     
     // In real app, this would come from database
-    // For now, count from localStorage
+    // For now, count from localStorage (exclude teachers)
     let studentCount = 0;
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('submissions_')) {
-          studentCount++;
+        if (key && key.startsWith('profile_')) {
+          try {
+            const profileData = JSON.parse(localStorage.getItem(key) || '{}');
+            // ไม่นับครู - เฉพาะนักเรียนเท่านั้น
+            if (!profileData.userType || profileData.userType === 'student') {
+              studentCount++;
+            }
+          } catch {
+            // Skip invalid profile data
+          }
         }
       }
-      return Math.max(studentCount, projectGroups.reduce((acc, g) => acc + g.members.length, 0));
+      // Fallback: count members in groups (if no profiles found)
+      const membersCount = projectGroups.reduce((acc, g) => acc + g.members.length, 0);
+      return Math.max(studentCount, membersCount);
     } catch (error) {
       console.error('Error accessing localStorage:', error);
       return 0;
@@ -386,14 +469,14 @@ export default function App(): React.ReactElement {
               <div className="flex flex-col items-end gap-2">
                 {/* Room Name */}
                 {roomName && (
-                  <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
+                  <div>
                     <span className="text-lg font-black text-[#1D324B] tracking-tight">{roomName}</span>
                   </div>
                 )}
                 
                 {/* Room ID */}
                 {roomId && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-xl">
+                  <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-slate-600 uppercase">Room ID:</span>
                     <span className="text-lg font-black text-[#1D324B] tracking-wider">{roomId}</span>
                     <button
@@ -678,24 +761,34 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
   const router = useRouter();
   const [newGroupName, setNewGroupName] = useState<string>('');
   const [newProjectName, setNewProjectName] = useState<string>('');
-  const [availableUsers, setAvailableUsers] = useState<string[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<MemberProfile[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      // Load available users
-      const users: string[] = [];
+      // Load available users with profiles
+      const users: MemberProfile[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && key.startsWith('rooms_')) {
-          const userName = key.replace('rooms_', '');
-          if (userName !== userData.name) {
-            users.push(userName);
+        if (key && key.startsWith('profile_')) {
+          const profileData = JSON.parse(localStorage.getItem(key) || '{}');
+          if (profileData.name && profileData.name !== userData.name && profileData.userType !== 'teacher') {
+            users.push({
+              name: profileData.name,
+              avatar: profileData.avatar || 'default'
+            });
           }
         }
       }
+      // Fallback demo users if none found
       if (users.length === 0) {
-        users.push('สมชาย ใจดี', 'วิภา สุขใจ', 'กิตติ รักเรียน', 'อรทัย แสงใส', 'นพดล มั่นคง');
+        users.push(
+          { name: 'สมชาย ใจดี', avatar: 'Felix' },
+          { name: 'วิภา สุขใจ', avatar: 'Aneka' },
+          { name: 'กิตติ รักเรียน', avatar: 'Luna' },
+          { name: 'อรทัย แสงใส', avatar: 'Mia' },
+          { name: 'นพดล มั่นคง', avatar: 'Milo' }
+        );
       }
       setAvailableUsers(users);
     }
@@ -705,11 +798,18 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
     if (!newGroupName.trim() || !newProjectName.trim()) return;
 
     const newGroupId = `g${Date.now()}`;
+    
+    // Get full profiles for selected members
+    const selectedMemberProfiles = availableUsers.filter(user => 
+      selectedMembers.includes(user.name)
+    );
+    
     const newGroup = {
       id: newGroupId,
       groupName: newGroupName,
       projectName: newProjectName,
-      members: selectedMembers
+      members: selectedMembers,
+      memberProfiles: selectedMemberProfiles
     };
 
     const storedGroups = localStorage.getItem('projectGroups') || '[]';
@@ -717,13 +817,21 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
     groups.push(newGroup);
     localStorage.setItem('projectGroups', JSON.stringify(groups));
 
+    // Save room-specific member profiles
+    const roomMembersKey = `roomMembers_${roomId}`;
+    const storedRoomMembers = localStorage.getItem(roomMembersKey);
+    const roomMembers = storedRoomMembers ? JSON.parse(storedRoomMembers) : {};
+    roomMembers[newGroupId] = selectedMemberProfiles;
+    localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
+
     const updatedUserData = {
       ...userData,
       groupId: newGroupId,
       groupName: newGroupName,
       projectName: newProjectName,
       isNewGroup: true,
-      newMembers: selectedMembers
+      newMembers: selectedMembers,
+      newMemberProfiles: selectedMemberProfiles
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
@@ -736,9 +844,9 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
     onGroupCreated();
   };
 
-  const toggleMember = (member: string) => {
+  const toggleMember = (memberName: string) => {
     setSelectedMembers(prev => 
-      prev.includes(member) ? prev.filter(m => m !== member) : [...prev, member]
+      prev.includes(memberName) ? prev.filter(m => m !== memberName) : [...prev, memberName]
     );
   };
 
@@ -787,18 +895,18 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
             <div className="grid grid-cols-2 gap-3 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border-2 border-slate-200">
               {availableUsers.map((user) => (
                 <button
-                  key={user}
-                  onClick={() => toggleMember(user)}
+                  key={user.name}
+                  onClick={() => toggleMember(user.name)}
                   className={`p-3 rounded-xl border-2 transition-all text-left ${
-                    selectedMembers.includes(user) ? 'border-[#1D324B] bg-slate-100' : 'border-slate-200 hover:border-[#1D324B]/30 bg-white'
+                    selectedMembers.includes(user.name) ? 'border-[#1D324B] bg-slate-100' : 'border-slate-200 hover:border-[#1D324B]/30 bg-white'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300">
-                      <img src={getRandomProfileImage(user)} alt={user} className="w-full h-full" />
+                      <img src={getRandomProfileImage(user.name)} alt={user.name} className="w-full h-full object-cover" />
                     </div>
-                    <p className="font-bold text-sm text-[#1D324B] truncate flex-1">{user}</p>
-                    {selectedMembers.includes(user) && (
+                    <p className="font-bold text-sm text-[#1D324B] truncate flex-1">{user.name}</p>
+                    {selectedMembers.includes(user.name) && (
                       <CheckCircle2 className="w-5 h-5 text-[#1D324B]" />
                     )}
                   </div>
