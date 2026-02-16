@@ -3,24 +3,30 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
-  Users,
   Plus,
   Check,
   ArrowRight,
   ChevronRight
 } from 'lucide-react';
 
+interface MemberProfile {
+  name: string;
+  avatar: string;
+}
+
 interface ProjectGroup {
   id: string;
   groupName: string;
   projectName: string;
   members: string[];
+  memberProfiles?: MemberProfile[];
 }
 
 interface UserData {
   name: string;
   avatar: string;
   userType: 'student' | 'teacher';
+  groupId?: string;
 }
 
 const PROJECT_GROUPS: ProjectGroup[] = [
@@ -98,6 +104,28 @@ export default function SelectGroupPage(): React.ReactElement {
       const customGroups = JSON.parse(storedCustomGroups);
       allGroups = [...PROJECT_GROUPS, ...customGroups];
     }
+    
+    // Load room-specific member profiles
+    const roomMembersKey = `roomMembers_${roomIdFromUrl}`;
+    const storedRoomMembers = localStorage.getItem(roomMembersKey);
+    if (storedRoomMembers) {
+      const roomMembers = JSON.parse(storedRoomMembers);
+      
+      // Update groups with room-specific member data
+      allGroups = allGroups.map(group => {
+        if (roomMembers[group.id]) {
+          return {
+            ...group,
+            memberProfiles: roomMembers[group.id],
+            members: roomMembers[group.id].map((m: any) => 
+              typeof m === 'string' ? m : m.name
+            )
+          };
+        }
+        return group;
+      });
+    }
+    
     setProjectGroups(allGroups);
   }, [router, searchParams]);
 
@@ -191,17 +219,38 @@ export default function SelectGroupPage(): React.ReactElement {
                       : 'border-slate-200 hover:border-[#1D324B]/30 bg-white'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="font-black text-lg text-[#1D324B] mb-1">{group.groupName}</h3>
-                      <p className="text-sm text-slate-600 font-medium mb-2">{group.projectName}</p>
-                      <div className="flex items-center gap-2 text-xs text-slate-500">
-                        <Users className="w-3 h-3" />
-                        <span className="font-bold">{group.members.length} สมาชิก</span>
+                      <p className="text-sm text-slate-600 font-medium mb-3">{group.projectName}</p>
+                      
+                      {/* Display member avatars */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500 font-bold">สมาชิก:</span>
+                        <div className="flex -space-x-2">
+                          {(group.memberProfiles && group.memberProfiles.length > 0
+                            ? group.memberProfiles
+                            : group.members.map(m => ({ name: m, avatar: m }))
+                          ).slice(0, 5).map((member, i) => (
+                            <div key={i} className="h-8 w-8 rounded-full border-2 border-white shadow-sm overflow-hidden">
+                              <img 
+                                src={getAvatarUrl(member.avatar)} 
+                                alt={member.name}
+                                className="object-cover w-full h-full"
+                              />
+                            </div>
+                          ))}
+                          {(group.memberProfiles ? group.memberProfiles.length : group.members.length) > 5 && (
+                            <div className="h-8 w-8 rounded-full border-2 border-white shadow-sm bg-slate-300 flex items-center justify-center">
+                              <span className="text-[10px] font-black text-slate-600">+{(group.memberProfiles ? group.memberProfiles.length : group.members.length) - 5}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs text-slate-500 font-bold">({group.memberProfiles ? group.memberProfiles.length : group.members.length})</span>
                       </div>
                     </div>
                     {selectedGroupId === group.id && (
-                      <div className="w-6 h-6 bg-[#1D324B] rounded-full flex items-center justify-center">
+                      <div className="w-6 h-6 bg-[#1D324B] rounded-full flex items-center justify-center flex-shrink-0">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                     )}

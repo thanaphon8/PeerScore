@@ -104,7 +104,7 @@ const getRandomProfileImage = (seed: string): string => {
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
 };
 
-export default function AnalyzePage(): React.ReactElement {
+export default function AnalyzeContent(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selectedGroup, setSelectedGroup] = useState<ProjectGroup | null>(null);
@@ -232,25 +232,49 @@ export default function AnalyzePage(): React.ReactElement {
     };
   }, [selectedGroup]);
 
-  const getDisplayMembers = (group: ProjectGroup): Array<{name: string; avatar: string; isCurrentUser?: boolean}> => {
-    // memberProfiles from roomMembers already includes current user (synced on login)
-    if (group.memberProfiles && group.memberProfiles.length > 0) {
-      const storedUserData = localStorage.getItem('userData');
-      const currentUserName = storedUserData ? JSON.parse(storedUserData).name : null;
-      return group.memberProfiles.map(m => ({
-        ...m,
-        isCurrentUser: m.name === currentUserName
-      }));
+  const getDisplayMembers = (group: ProjectGroup): string[] => {
+    // Check if this is user's own group
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      if (userData.groupId === group.id) {
+        // User's own group - show user first with their actual name from userData
+        return [userData.name, ...group.members];
+      }
     }
-    // Fallback: use members array
-    return group.members.map(m => ({ name: m, avatar: m, isCurrentUser: false }));
+    // Not user's group - just show members (no group name)
+    return group.members;
+  };
+
+  const isUserMember = (index: number): boolean => {
+    // First member (index 0) is the user if it's their own group
+    const storedUserData = localStorage.getItem('userData');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      if (userData.groupId === selectedGroup?.id && index === 0) {
+        return true;
+      }
+    }
+    return false;
   };
 
   const getMemberAvatar = (member: string, index: number): string => {
+    // If this is the user (index 0 in own group), use their avatar
+    if (isUserMember(index)) {
+      const storedUserData = localStorage.getItem('userData');
+      if (storedUserData) {
+        const userData = JSON.parse(storedUserData);
+        return getRandomProfileImage(userData.avatar);
+      }
+    }
+    // Check if memberProfiles exist and get avatar
     if (selectedGroup?.memberProfiles) {
       const profile = selectedGroup.memberProfiles.find(p => p.name === member);
-      if (profile) return getRandomProfileImage(profile.avatar);
+      if (profile) {
+        return getRandomProfileImage(profile.avatar);
+      }
     }
+    // Otherwise use member name for avatar
     return getRandomProfileImage(member);
   };
 
@@ -321,27 +345,32 @@ export default function AnalyzePage(): React.ReactElement {
                 <UserCircle className="w-4 h-4" /> Team Members
               </h3>
               <div className="flex flex-wrap gap-8">
-                {getDisplayMembers(selectedGroup).map((member, i) => (
-                  <div key={i} className="flex flex-col items-center gap-2 group">
-                    <div className={`w-20 h-20 rounded-full overflow-hidden shadow-lg border-2 ring-2 ${
-                      member.isCurrentUser ? 'border-blue-600 ring-blue-100' : 'border-slate-200 ring-slate-100'
-                    }`}>
-                      <img 
-                        src={getRandomProfileImage(member.avatar)} 
-                        alt={member.name}
-                        className="object-cover w-full h-full"
-                      />
+                {getDisplayMembers(selectedGroup).map((member, i) => {
+                  const isCurrentUser = isUserMember(i);
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-2 group">
+                      <div className={`w-20 h-20 rounded-full overflow-hidden shadow-lg border-2 ring-2 ${
+                        isCurrentUser ? 'border-blue-600 ring-blue-100' : 'border-slate-200 ring-slate-100'
+                      }`}>
+                        <img 
+                          src={getMemberAvatar(member, i)} 
+                          alt={member}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <p className={`text-xs font-black ${isCurrentUser ? 'text-blue-600' : 'text-[#1D324B]'}`}>
+                          {member}
+                        </p>
+                        <p className={`text-[8px] font-bold uppercase ${
+                          isCurrentUser ? 'text-blue-600' : 'text-slate-400'
+                        }`}>
+                          {isCurrentUser ? 'You' : 'Member'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className={`text-xs font-black ${member.isCurrentUser ? 'text-blue-600' : 'text-[#1D324B]'}`}>
-                        {member.name}
-                      </p>
-                      <p className={`text-[8px] font-bold uppercase ${member.isCurrentUser ? 'text-blue-600' : 'text-slate-400'}`}>
-                        {member.isCurrentUser ? 'You' : 'Member'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

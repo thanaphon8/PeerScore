@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # MongoDB Service
   mongodb:
-    image: mongo:7.0-alpine
+    image: mongo:latest
     container_name: peerscore-mongodb
     restart: unless-stopped
     ports:

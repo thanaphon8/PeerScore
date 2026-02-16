@@ -26,6 +26,7 @@ interface ProjectGroup {
   groupName: string;
   projectName: string;
   members: string[];
+  memberProfiles?: Array<{ name: string; avatar: string }>;
 }
 
 interface ScoreLabel {
@@ -93,6 +94,10 @@ const getRandomProfileImage = (seed: string): string => {
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
 };
 
+const getAvatarUrl = (avatar: string): string => {
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(avatar)}&backgroundColor=ffffff`;
+};
+
 export default function EvaluatePage(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -119,6 +124,29 @@ export default function EvaluatePage(): React.ReactElement {
           if (storedGroups) {
             const customGroups = JSON.parse(storedGroups);
             allGroups = [...PROJECT_GROUPS, ...customGroups];
+          }
+          
+          // Load room-specific member profiles
+          if (rmId) {
+            const roomMembersKey = `roomMembers_${rmId}`;
+            const storedRoomMembers = localStorage.getItem(roomMembersKey);
+            if (storedRoomMembers) {
+              const roomMembers = JSON.parse(storedRoomMembers);
+              
+              // Update groups with room-specific member data
+              allGroups = allGroups.map(group => {
+                if (roomMembers[group.id]) {
+                  return {
+                    ...group,
+                    memberProfiles: roomMembers[group.id],
+                    members: roomMembers[group.id].map((m: any) => 
+                      typeof m === 'string' ? m : m.name
+                    )
+                  };
+                }
+                return group;
+              });
+            }
           }
         } catch (error) {
           console.error('Error loading custom groups:', error);
@@ -217,16 +245,21 @@ export default function EvaluatePage(): React.ReactElement {
                       <UserCircle className="w-4 h-4" /> Group Members
                   </h3>
                   <div className="flex flex-wrap gap-4">
-                      {selectedGroup.members.map((member, i) => (
+                      {(selectedGroup.memberProfiles && selectedGroup.memberProfiles.length > 0
+                        ? selectedGroup.memberProfiles
+                        : selectedGroup.members.map(m => ({ name: m, avatar: m }))
+                      ).map((member, i) => (
                       <div key={i} className="flex flex-col items-center gap-2">
                         <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg border-2 border-slate-200 ring-2 ring-slate-100">
                           <img 
-                            src={getRandomProfileImage(member)} 
-                            alt={member}
+                            src={getAvatarUrl(member.avatar)} 
+                            alt={member.name}
                             className="object-cover w-full h-full"
                           />
                         </div>
-                        <p className="text-[9px] font-bold text-slate-500 text-center max-w-[64px]">{member}</p>
+                        <p className="text-[9px] font-bold text-slate-500 text-center max-w-[64px]">
+                          {member.name}
+                        </p>
                       </div>
                       ))}
                   </div>
