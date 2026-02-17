@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   ArrowLeft,
@@ -29,7 +29,7 @@ const getAvatarUrl = (seed: string): string => {
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
 };
 
-export default function RoomPreview(): React.ReactElement | null {
+function RoomPreviewContent(): React.ReactElement | null {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -253,5 +253,17 @@ export default function RoomPreview(): React.ReactElement | null {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RoomPreview(): React.ReactElement | null {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <p className="text-[#1D324B] font-black">Loading...</p>
+      </div>
+    }>
+      <RoomPreviewContent />
+    </Suspense>
   );
 }

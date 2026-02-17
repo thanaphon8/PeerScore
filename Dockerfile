@@ -11,12 +11,14 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
+
 COPY . .
 
 # Build Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-RUN npm run build
+ENV MONGODB_URI=mongodb://mock:mock@localhost:27017/peerscore
+RUN npm run build 2>&1
 
 # Stage 3: Runtime
 FROM node:20-alpine AS runner

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Users, 
@@ -119,7 +119,7 @@ const getAvatarUrl = (seed: string): string => {
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
 };
 
-export default function App(): React.ReactElement {
+function AppContent(): React.ReactElement {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [projectGroups, setProjectGroups] = useState<ProjectGroup[]>(PROJECT_GROUPS);
@@ -950,5 +950,17 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
         </div>
       </div>
     </div>
+  );
+}
+
+export default function App(): React.ReactElement {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <p className="text-[#1D324B] font-black">Loading...</p>
+      </div>
+    }>
+      <AppContent />
+    </Suspense>
   );
 }
