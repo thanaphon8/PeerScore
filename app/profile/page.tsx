@@ -12,7 +12,9 @@ import {
   GraduationCap,
   Briefcase,
   LogOut,
-  X
+  X,
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 
 interface UserData {
@@ -80,7 +82,7 @@ const AVATAR_SEEDS = [
 ];
 
 const getAvatarUrl = (seed: string): string => {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=e0e7ff`;
 };
 
 export default function ProfilePage(): React.ReactElement {
@@ -108,13 +110,11 @@ export default function ProfilePage(): React.ReactElement {
     setSelectedAvatar(parsedUserData.avatar);
     setSelectedGroupId(parsedUserData.groupId);
 
-    // Get roomId from URL or localStorage
     const urlParams = new URLSearchParams(window.location.search);
     const roomIdFromUrl = urlParams.get('roomId');
     if (roomIdFromUrl) {
       setRoomId(roomIdFromUrl);
     } else {
-      // Try to get from user's last accessed room
       const rooms = localStorage.getItem(`rooms_${parsedUserData.name}`);
       if (rooms) {
         const roomsList = JSON.parse(rooms);
@@ -129,9 +129,7 @@ export default function ProfilePage(): React.ReactElement {
     if (!userData) return;
     
     setIsSaving(true);
-
-    // Simulate saving delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 600)); // Slightly longer for effect
 
     const currentGroup = projectGroups.find(g => g.id === selectedGroupId);
     
@@ -148,7 +146,6 @@ export default function ProfilePage(): React.ReactElement {
     setUserData(updatedUserData);
     setIsSaving(false);
 
-    // Redirect back to main page with the new group and roomId
     if (roomId) {
       router.push(`/?userGroupId=${selectedGroupId}&roomId=${roomId}`);
     } else {
@@ -166,10 +163,10 @@ export default function ProfilePage(): React.ReactElement {
 
   if (!userData) {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#1D324B] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[#1D324B] font-bold">กำลังโหลด...</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium animate-pulse">กำลังโหลดข้อมูล...</p>
         </div>
       </div>
     );
@@ -179,228 +176,253 @@ export default function ProfilePage(): React.ReactElement {
   const hasChanges = name !== userData.name || selectedAvatar !== userData.avatar || selectedGroupId !== userData.groupId;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 text-[#1D324B] p-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#1D324B]/[0.02] pointer-events-none" />
-      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
-      
-      <div className="relative z-10 max-w-4xl mx-auto pt-8">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#1e293b] font-sans selection:bg-indigo-100">
+      {/* Dynamic Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-indigo-200/30 rounded-full blur-[100px]" />
+        <div className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] bg-purple-200/30 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-[20%] w-[30%] h-[30%] bg-blue-100/40 rounded-full blur-[80px]" />
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8 lg:py-12">
+        {/* Navigation */}
         <button 
           onClick={() => roomId ? router.push(`/?userGroupId=${userData.groupId}&roomId=${roomId}`) : router.push(`/?userGroupId=${userData.groupId}`)}
-          className="flex items-center gap-2 text-slate-600 hover:text-[#1D324B] mb-8 font-black text-xs uppercase tracking-widest transition-colors group"
+          className="group flex items-center gap-2 text-slate-500 hover:text-indigo-600 mb-8 px-4 py-2 rounded-lg hover:bg-white/50 transition-all duration-300 w-fit"
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          ย้อนกลับ
+          <div className="bg-white p-2 rounded-full shadow-sm group-hover:shadow-md transition-all">
+            <ArrowLeft className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-sm">ย้อนกลับหน้าหลัก</span>
         </button>
 
-        <div className="bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 sm:p-12 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                {userData.userType === 'student' ? (
-                  <GraduationCap className="w-8 h-8" />
-                ) : (
-                  <Briefcase className="w-8 h-8" />
-                )}
-                <h1 className="text-3xl font-black tracking-tight">แก้ไขโปรไฟล์</h1>
-              </div>
-              <p className="text-white/80 font-medium">จัดการข้อมูลส่วนตัวและการตั้งค่าของคุณ</p>
-            </div>
-          </div>
-
-          {/* Profile Content */}
-          <div className="p-8 sm:p-12 space-y-8">
-            {/* User Type Badge */}
-            <div className="flex justify-center">
-              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-black uppercase ${
-                userData.userType === 'teacher' 
-                  ? 'bg-amber-100 text-amber-700' 
-                  : 'bg-blue-100 text-blue-700'
-              }`}>
-                {userData.userType === 'teacher' ? '👨‍🏫 ครู' : '🎓 นักเรียน'}
-              </span>
-            </div>
-
-            {/* Avatar Section */}
-            <div className="text-center space-y-4">
-              <label className="block text-sm font-black text-slate-700 uppercase tracking-wider mb-4">รูปอวาตาร์</label>
-              <div className="relative inline-block">
-                <div className="w-32 h-32 rounded-full overflow-hidden mx-auto border-4 border-blue-600 shadow-xl ring-4 ring-blue-100">
-                  <img src={getAvatarUrl(selectedAvatar)} alt="Avatar" className="w-full h-full object-cover" />
+        <div className="grid lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Avatar & Identity Card */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-white/70 backdrop-blur-xl border border-white/50 rounded-3xl p-8 shadow-xl text-center relative overflow-hidden group">
+               {/* Decorative background behind avatar */}
+               <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-10 group-hover:opacity-20 transition-opacity duration-500" />
+               
+              <div className="relative inline-block mb-6">
+                <div className="w-40 h-40 rounded-full p-1 bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-2xl">
+                   <div className="w-full h-full rounded-full bg-white overflow-hidden relative">
+                      <img 
+                        src={getAvatarUrl(selectedAvatar)} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110" 
+                      />
+                   </div>
                 </div>
                 <button
                   onClick={() => setShowAvatarPicker(!showAvatarPicker)}
-                  className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+                  className="absolute bottom-1 right-1 w-10 h-10 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center transition-all duration-300 transform hover:scale-105 border-4 border-white"
                 >
                   <Camera className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Avatar Picker */}
-              {showAvatarPicker && (
-                <div className="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-sm font-black text-slate-700 uppercase">เลือกอวาตาร์</p>
-                    <button
-                      onClick={() => setShowAvatarPicker(false)}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-8 gap-3 max-h-64 overflow-y-auto">
-                    {AVATAR_SEEDS.map((seed) => (
-                      <button
-                        key={seed}
-                        onClick={() => {
-                          setSelectedAvatar(seed);
-                          setShowAvatarPicker(false);
-                        }}
-                        className={`relative rounded-xl overflow-hidden border-2 transition-all ${
-                          selectedAvatar === seed 
-                            ? 'border-blue-600 ring-4 ring-blue-100 scale-110' 
-                            : 'border-slate-200 hover:border-blue-400'
-                        }`}
-                      >
-                        <img src={getAvatarUrl(seed)} alt={seed} className="w-full h-full object-cover" />
-                        {selectedAvatar === seed && (
-                          <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                            <Check className="w-5 h-5 text-blue-600" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Name Input */}
-            <div>
-              <label className="block text-sm font-black text-slate-700 mb-3 uppercase tracking-wider">ชื่อ-นามสกุล</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="กรอกชื่อ-นามสกุล"
-                className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-blue-600 focus:bg-white outline-none font-bold text-[#1D324B] transition-all"
-              />
-            </div>
-
-            {/* Group Section - Only for Students */}
-            {userData.userType === 'student' && (
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-black text-slate-700 uppercase tracking-wider">กลุ่มของคุณ</label>
-                  <button
-                    onClick={() => setShowGroupPicker(!showGroupPicker)}
-                    className="text-sm font-black text-blue-600 hover:text-blue-700 uppercase tracking-wider"
-                  >
-                    เปลี่ยนกลุ่ม
-                  </button>
-                </div>
-
-                {currentGroup ? (
-                  <div className="p-5 bg-amber-50 border-2 border-amber-200 rounded-2xl">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-black text-lg text-[#1D324B] mb-1">{currentGroup.groupName}</h3>
-                        <p className="text-sm text-slate-600 font-medium mb-2">{currentGroup.projectName}</p>
-                        <div className="flex items-center gap-2 text-xs text-slate-500">
-                          <Users className="w-3 h-3" />
-                          <span className="font-bold">{currentGroup.members.length} สมาชิก</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-center">
-                    <p className="text-slate-500 font-medium">ไม่พบข้อมูลกลุ่ม</p>
-                  </div>
-                )}
-
-                {/* Group Picker */}
-                {showGroupPicker && (
-                  <div className="mt-4 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-                    <div className="flex justify-between items-center mb-4">
-                      <p className="text-sm font-black text-slate-700 uppercase">เลือกกลุ่ม</p>
-                      <button
-                        onClick={() => setShowGroupPicker(false)}
-                        className="text-slate-400 hover:text-slate-600"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {projectGroups.map((group) => (
-                        <button
-                          key={group.id}
-                          onClick={() => {
-                            setSelectedGroupId(group.id);
-                            setShowGroupPicker(false);
-                          }}
-                          className={`w-full p-4 border-2 rounded-xl text-left transition-all ${
-                            selectedGroupId === group.id
-                              ? 'border-blue-600 bg-blue-50'
-                              : 'border-slate-200 hover:border-blue-400 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-black text-base text-[#1D324B] mb-1">{group.groupName}</h3>
-                              <p className="text-xs text-slate-600 font-medium mb-2">{group.projectName}</p>
-                              <div className="flex items-center gap-2 text-xs text-slate-500">
-                                <Users className="w-3 h-3" />
-                                <span className="font-bold">{group.members.length} สมาชิก</span>
-                              </div>
-                            </div>
-                            {selectedGroupId === group.id && (
-                              <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Check className="w-4 h-4 text-white" />
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              <h2 className="text-2xl font-black text-slate-800 mb-1">{name || 'ไม่มีชื่อ'}</h2>
+              <div className="flex justify-center gap-2 mb-6">
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${
+                  userData.userType === 'teacher' 
+                    ? 'bg-amber-50 text-amber-600 border-amber-200' 
+                    : 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                }`}>
+                  {userData.userType === 'teacher' ? <Briefcase className="w-3 h-3"/> : <GraduationCap className="w-3 h-3"/>}
+                  {userData.userType === 'teacher' ? 'คุณครู' : 'นักเรียน'}
+                </span>
+                
+                {currentGroup && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-50 text-emerald-600 border border-emerald-200">
+                    <Users className="w-3 h-3"/>
+                    {currentGroup.groupName}
+                  </span>
                 )}
               </div>
-            )}
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
-              <button
-                onClick={handleSave}
-                disabled={!hasChanges || !name.trim() || isSaving}
-                className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:cursor-not-allowed"
-              >
-                {isSaving ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    กำลังบันทึก...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-5 h-5" />
-                    บันทึกการเปลี่ยนแปลง
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Logout Button */}
-            <div className="pt-6 border-t border-slate-200">
               <button
                 onClick={handleLogout}
-                className="w-full py-4 border-2 border-red-200 hover:border-red-300 hover:bg-red-50 text-red-600 font-black rounded-2xl transition-all flex items-center justify-center gap-3 uppercase tracking-wider"
+                className="w-full py-3 px-4 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
                 ออกจากระบบ
               </button>
             </div>
+
+            {/* Change Avatar Panel (Mobile/Desktop Toggle) */}
+            {showAvatarPicker && (
+              <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl p-6 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-indigo-500"/> เลือกอวาตาร์ใหม่
+                  </h3>
+                  <button onClick={() => setShowAvatarPicker(false)} className="text-slate-400 hover:text-slate-600 p-1 hover:bg-slate-100 rounded-full transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                  {AVATAR_SEEDS.map((seed) => (
+                    <button
+                      key={seed}
+                      onClick={() => {
+                        setSelectedAvatar(seed);
+                        setShowAvatarPicker(false);
+                      }}
+                      className={`relative rounded-xl overflow-hidden aspect-square transition-all duration-200 group ${
+                        selectedAvatar === seed 
+                          ? 'ring-2 ring-indigo-500 shadow-md scale-95' 
+                          : 'hover:ring-2 hover:ring-indigo-300 hover:shadow-sm'
+                      }`}
+                    >
+                      <div className={`absolute inset-0 bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity ${selectedAvatar === seed ? 'opacity-100' : ''}`} />
+                      <img src={getAvatarUrl(seed)} alt={seed} className="w-full h-full object-cover" />
+                      {selectedAvatar === seed && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-indigo-600/20">
+                           <div className="bg-white rounded-full p-0.5 shadow-sm">
+                              <Check className="w-3 h-3 text-indigo-600" />
+                           </div>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Edit Form */}
+          <div className="lg:col-span-8 space-y-6">
+            
+            {/* Main Form Card */}
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+              <div className="p-8 border-b border-slate-100 flex items-center gap-4 bg-gradient-to-r from-slate-50 to-white">
+                <div className="p-3 bg-indigo-100 rounded-xl text-indigo-600">
+                  <User className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-800">แก้ไขข้อมูลส่วนตัว</h3>
+                  <p className="text-sm text-slate-500">ปรับปรุงข้อมูลของคุณให้เป็นปัจจุบัน</p>
+                </div>
+              </div>
+
+              <div className="p-8 space-y-8">
+                {/* Name Input */}
+                <div className="space-y-3">
+                  <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    ชื่อ-นามสกุล <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="กรอกชื่อ-นามสกุลของคุณ"
+                      className="w-full pl-4 pr-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none font-semibold text-slate-800 transition-all duration-300 placeholder:text-slate-400 group-hover:border-slate-300"
+                    />
+                  </div>
+                </div>
+
+                {/* Group Section */}
+                {userData.userType === 'student' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                         สังกัดกลุ่มโปรเจกต์
+                      </label>
+                      <button
+                        onClick={() => setShowGroupPicker(!showGroupPicker)}
+                        className="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        {showGroupPicker ? 'ปิดตัวเลือก' : 'เปลี่ยนกลุ่ม'}
+                      </button>
+                    </div>
+
+                    {!showGroupPicker && currentGroup && (
+                       <div className="p-6 bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 rounded-2xl flex items-start justify-between group hover:shadow-md transition-all duration-300">
+                          <div>
+                             <h4 className="font-black text-lg text-indigo-900 mb-1">{currentGroup.groupName}</h4>
+                             <p className="text-slate-600 font-medium text-sm mb-3">{currentGroup.projectName}</p>
+                             <div className="flex -space-x-2">
+                                {currentGroup.members.slice(0, 3).map((m, i) => (
+                                   <div key={i} className="w-8 h-8 rounded-full bg-indigo-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-indigo-700" title={m}>
+                                      {m.charAt(0)}
+                                   </div>
+                                ))}
+                                {currentGroup.members.length > 3 && (
+                                   <div className="w-8 h-8 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                      +{currentGroup.members.length - 3}
+                                   </div>
+                                )}
+                             </div>
+                          </div>
+                          <div className="p-2 bg-white rounded-full shadow-sm text-indigo-500">
+                             <Check className="w-5 h-5" />
+                          </div>
+                       </div>
+                    )}
+
+                    {showGroupPicker && (
+                      <div className="grid sm:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                        {projectGroups.map((group) => (
+                          <button
+                            key={group.id}
+                            onClick={() => {
+                              setSelectedGroupId(group.id);
+                              setShowGroupPicker(false);
+                            }}
+                            className={`p-4 rounded-xl border-2 text-left transition-all duration-200 relative overflow-hidden ${
+                              selectedGroupId === group.id
+                                ? 'border-indigo-500 bg-indigo-50 shadow-md ring-1 ring-indigo-500'
+                                : 'border-slate-100 bg-white hover:border-indigo-300 hover:shadow-sm'
+                            }`}
+                          >
+                            <div className="relative z-10">
+                              <h4 className={`font-bold text-sm mb-1 ${selectedGroupId === group.id ? 'text-indigo-900' : 'text-slate-800'}`}>
+                                {group.groupName}
+                              </h4>
+                              <p className="text-xs text-slate-500 line-clamp-1 mb-2">{group.projectName}</p>
+                              <div className="flex items-center gap-1 text-xs text-slate-400">
+                                <Users className="w-3 h-3" />
+                                <span>{group.members.length} คน</span>
+                              </div>
+                            </div>
+                            {selectedGroupId === group.id && (
+                               <div className="absolute top-0 right-0 p-1.5 bg-indigo-500 rounded-bl-xl text-white">
+                                  <Check className="w-3 h-3" />
+                               </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Footer Actions */}
+              <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end">
+                 <button
+                  onClick={handleSave}
+                  disabled={!hasChanges || !name.trim() || isSaving}
+                  className="relative overflow-hidden px-8 py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 disabled:shadow-none transition-all transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:cursor-not-allowed flex items-center gap-2 group"
+                >
+                  {isSaving ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>กำลังบันทึก...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>บันทึกการเปลี่ยนแปลง</span>
+                      <ChevronRight className="w-4 h-4 opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>

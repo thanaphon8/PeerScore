@@ -467,8 +467,93 @@ export default function AnalyzePage(): React.ReactElement {
                   )}
               </div>
           </div>
+
+          {/* Teacher Feedback Section */}
+          <TeacherFeedbackSection 
+            groupId={selectedGroup.id}
+            roomId={roomId}
+            onFeedbackSubmitted={() => window.location.reload()}
+          />
         </div>
       </div>
+    </div>
+  );
+}
+
+// Teacher Feedback Component
+function TeacherFeedbackSection({ 
+  groupId, 
+  roomId, 
+  onFeedbackSubmitted 
+}: { 
+  groupId: string; 
+  roomId: string | null; 
+  onFeedbackSubmitted: () => void;
+}) {
+  const [feedback, setFeedback] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Check if user is teacher
+  const storedUserData = typeof window !== 'undefined' ? localStorage.getItem('userData') : null;
+  const userData = storedUserData ? JSON.parse(storedUserData) : null;
+  const isTeacher = userData?.userType === 'teacher';
+
+  if (!isTeacher) return null;
+
+  const handleSubmit = () => {
+    if (!feedback.trim() || !roomId) return;
+
+    setIsSubmitting(true);
+
+    // Save feedback as evaluation
+    const evaluationData = {
+      groupId: groupId,
+      evaluatorGroupId: 'teacher',
+      evaluatorType: 'teacher',
+      evaluatorName: userData.name,
+      evaluatorAvatar: userData.avatar,
+      scores: {}, // No scores for teacher feedback
+      comment: feedback,
+      timestamp: new Date().toISOString()
+    };
+
+    const existingEvaluations = localStorage.getItem('evaluations') || '[]';
+    const evaluations = JSON.parse(existingEvaluations);
+    evaluations.push(evaluationData);
+    localStorage.setItem('evaluations', JSON.stringify(evaluations));
+
+    setFeedback('');
+    setIsSubmitting(false);
+    onFeedbackSubmitted();
+  };
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-2xl mt-6">
+      <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+        <MessageSquare className="w-5 h-5 text-amber-600" />
+        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">
+          Teacher Feedback
+        </h3>
+        <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[9px] font-black rounded-full uppercase ml-2">
+          ครู
+        </span>
+      </div>
+
+      <textarea
+        value={feedback}
+        onChange={(e) => setFeedback(e.target.value)}
+        placeholder="เขียนความคิดเห็นและข้อเสนอแนะให้กับกลุ่มนี้..."
+        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-[#1D324B] outline-none resize-none min-h-[120px] font-medium text-[#1D324B]"
+      />
+
+      <button
+        onClick={handleSubmit}
+        disabled={!feedback.trim() || isSubmitting}
+        className="mt-4 w-full py-3 bg-[#1D324B] hover:bg-[#152238] disabled:bg-slate-300 text-white font-black rounded-xl transition-all flex items-center justify-center gap-2 uppercase disabled:cursor-not-allowed"
+      >
+        {isSubmitting ? 'กำลังส่ง...' : 'ส่ง Feedback'}
+        <MessageSquare className="w-4 h-4" />
+      </button>
     </div>
   );
 }

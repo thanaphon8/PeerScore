@@ -2,14 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, 
+import Image from 'next/image';
+import {
+  ArrowLeft,
   ChevronRight,
-  UserCircle,
-  Users,
-  Plus,
   Check,
-  GraduationCap,
   Trash2,
   History
 } from 'lucide-react';
@@ -22,54 +19,8 @@ interface SavedProfile {
   lastLogin: string;
 }
 
-interface ProjectGroup {
-  id: string;
-  groupName: string;
-  projectName: string;
-  members: string[];
-}
-
-const PROJECT_GROUPS: ProjectGroup[] = [
-  {
-    id: 'g1',
-    groupName: 'Cyber Knights',
-    projectName: 'AI Smart Home Dashboard',
-    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน']
-  },
-  {
-    id: 'g2',
-    groupName: 'Quantum Coders',
-    projectName: 'Blockchain Voting System',
-    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส']
-  },
-  {
-    id: 'g3',
-    groupName: 'Data Wizards',
-    projectName: 'Predictive Analytics Tool',
-    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย']
-  },
-  {
-    id: 'g4',
-    groupName: 'InnovateX',
-    projectName: 'Smart City Traffic Control',
-    members: ['กมล แสนดี', 'ศิริพร สุขใจ']
-  },
-  {
-    id: 'g5',
-    groupName: 'Tech Titans',
-    projectName: 'Drone Delivery Network',
-    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส']
-  },
-  {
-    id: 'g6',
-    groupName: 'Code Breakers',
-    projectName: 'Cybersecurity Shield',
-    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา']
-  }
-];
-
 const AVATAR_SEEDS = [
-  'Felix', 'Aneka', 'Luna', 'Oliver', 'Mia', 'Charlie', 
+  'Felix', 'Aneka', 'Luna', 'Oliver', 'Mia', 'Charlie',
   'Zoe', 'Max', 'Sophie', 'Leo', 'Emma', 'Jack',
   'Lily', 'Oscar', 'Ava', 'Milo', 'Chloe', 'Archie'
 ];
@@ -86,7 +37,6 @@ export default function StudentLoginPage(): React.ReactElement {
   const [savedProfiles, setSavedProfiles] = useState<SavedProfile[]>([]);
 
   useEffect(() => {
-    // Load saved profiles from localStorage
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       try {
         const profiles: SavedProfile[] = [];
@@ -99,7 +49,6 @@ export default function StudentLoginPage(): React.ReactElement {
             }
           }
         }
-        // Sort by last login (most recent first)
         profiles.sort((a, b) => new Date(b.lastLogin).getTime() - new Date(a.lastLogin).getTime());
         setSavedProfiles(profiles);
       } catch (error) {
@@ -110,10 +59,8 @@ export default function StudentLoginPage(): React.ReactElement {
 
   const handleNameSubmit = (): void => {
     if (studentName.trim()) {
-      // Check if profile already exists
       const existingProfile = savedProfiles.find(p => p.name.toLowerCase() === studentName.trim().toLowerCase());
       if (existingProfile) {
-        // Use existing profile
         setSelectedAvatar(existingProfile.avatar);
       }
       setStep(2);
@@ -121,20 +68,16 @@ export default function StudentLoginPage(): React.ReactElement {
   };
 
   const handleLogin = (): void => {
-    // Check if profile already exists
     const existingProfile = savedProfiles.find(p => p.name.toLowerCase() === studentName.trim().toLowerCase());
-    
-    // Save user data to localStorage
     const userData = {
       name: studentName,
       avatar: selectedAvatar,
-      groupId: existingProfile?.groupId || `student_${Date.now()}`, // Use existing groupId or create new
+      groupId: existingProfile?.groupId || `student_${Date.now()}`,
       groupName: existingProfile?.groupName,
       userType: 'student'
     };
     localStorage.setItem('userData', JSON.stringify(userData));
 
-    // Save/Update profile for quick login
     const profileData: SavedProfile = {
       name: studentName,
       avatar: selectedAvatar,
@@ -143,7 +86,6 @@ export default function StudentLoginPage(): React.ReactElement {
       lastLogin: new Date().toISOString()
     };
     localStorage.setItem(`profile_${studentName}`, JSON.stringify(profileData));
-
     router.push('/room');
   };
 
@@ -155,170 +97,175 @@ export default function StudentLoginPage(): React.ReactElement {
       groupName: profile.groupName,
       userType: 'student'
     };
-
     localStorage.setItem('userData', JSON.stringify(userData));
-
-    // Update last login time
-    const updatedProfile: SavedProfile = {
-      ...profile,
-      lastLogin: new Date().toISOString()
-    };
+    const updatedProfile: SavedProfile = { ...profile, lastLogin: new Date().toISOString() };
     localStorage.setItem(`profile_${profile.name}`, JSON.stringify(updatedProfile));
-
     router.push('/room');
   };
 
   const handleDeleteProfile = (profileName: string, event: React.MouseEvent): void => {
     event.stopPropagation();
     if (!confirm(`คุณต้องการลบโปรไฟล์ "${profileName}" หรือไม่?`)) return;
-
     localStorage.removeItem(`profile_${profileName}`);
     setSavedProfiles(prev => prev.filter(p => p.name !== profileName));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 text-[#1D324B] flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#1D324B]/[0.02] pointer-events-none" />
-      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
-      
-      <div className="relative z-10 max-w-7xl w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Login Form */}
-          <div className={savedProfiles.length > 0 ? "lg:col-span-8" : "lg:col-span-12 max-w-3xl mx-auto w-full"}>
-        <button 
-          onClick={() => step === 1 ? router.push('/login') : setStep((step - 1) as 1 | 2)}
-          className="flex items-center gap-2 text-slate-600 hover:text-[#1D324B] mb-8 font-black text-xs uppercase tracking-widest transition-colors group"
+    <div className="min-h-screen bg-gray-200 flex items-center justify-center p-8">
+      <div className="w-full max-w-5xl">
+
+        {/* Back Button */}
+        <button
+          onClick={() => step === 1 ? router.push('/login') : setStep(1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-8 font-semibold text-sm transition-colors group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           ย้อนกลับ
         </button>
 
-        <div className="bg-white border border-slate-200 rounded-3xl p-8 sm:p-12 shadow-2xl">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-3xl font-black text-[#1D324B] mb-2">เข้าสู่ระบบนักเรียน</h2>
-            <p className="text-slate-600 text-sm font-medium">
-              {step === 1 && 'กรุณากรอกชื่อของคุณ'}
-              {step === 2 && 'เลือกรูปอวาตาร์ของคุณ'}
-            </p>
-          </div>
+        <div className={`grid gap-8 ${savedProfiles.length > 0 ? 'lg:grid-cols-12' : 'lg:grid-cols-1'}`}>
 
-          {/* Step Indicator */}
-          <div className="flex justify-center gap-2 mb-8">
-            {[1, 2].map((s) => (
-              <div 
-                key={s}
-                className={`h-2 rounded-full transition-all ${
-                  s === step ? 'w-12 bg-blue-600' : s < step ? 'w-8 bg-blue-400' : 'w-8 bg-slate-200'
-                }`}
-              />
-            ))}
-          </div>
+          {/* Main Card */}
+          <div className={savedProfiles.length > 0 ? 'lg:col-span-8' : 'max-w-2xl mx-auto w-full'}>
+            <div className="bg-white rounded-3xl shadow-md border border-gray-200 overflow-hidden">
 
-          {/* Step 1: Name Input */}
-          {step === 1 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-black text-slate-700 mb-3 uppercase tracking-wider">ชื่อของคุณ</label>
-                <input
-                  type="text"
-                  value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                  placeholder="กรอกชื่อ-นามสกุล"
-                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-blue-600 focus:bg-white outline-none font-bold text-[#1D324B] transition-all"
-                  onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
-                />
-              </div>
-              <button
-                onClick={handleNameSubmit}
-                disabled={!studentName.trim()}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-400 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider disabled:cursor-not-allowed"
-              >
-                ถัดไป
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          )}
-
-          {/* Step 2: Avatar Selection */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <div className="text-center mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden mx-auto mb-4 border-4 border-blue-600 shadow-xl ring-4 ring-blue-100">
-                  <img src={getAvatarUrl(selectedAvatar)} alt="Selected Avatar" className="w-full h-full object-cover" />
+              {/* Top Banner with student image */}
+              <div className="bg-[#1D324B] px-10 pt-10 pb-0 flex flex-col items-center">
+                <h1 className="text-4xl font-black text-white tracking-widest mb-6">STUDENT</h1>
+                <div className="w-48 h-48 relative">
+                  <Image
+                    src="/images/student.png"
+                    alt="Student"
+                    fill
+                    className="object-contain"
+                  />
                 </div>
-                <p className="font-black text-[#1D324B] text-lg">{studentName}</p>
               </div>
 
-              <div className="grid grid-cols-6 gap-3 max-h-80 overflow-y-auto p-2">
-                {AVATAR_SEEDS.map((seed) => (
-                  <button
-                    key={seed}
-                    onClick={() => setSelectedAvatar(seed)}
-                    className={`relative rounded-2xl overflow-hidden border-2 transition-all ${
-                      selectedAvatar === seed 
-                        ? 'border-blue-600 ring-4 ring-blue-100 scale-110' 
-                        : 'border-slate-200 hover:border-blue-400'
-                    }`}
-                  >
-                    <img src={getAvatarUrl(seed)} alt={seed} className="w-full h-full object-cover" />
-                    {selectedAvatar === seed && (
-                      <div className="absolute inset-0 bg-blue-600/20 flex items-center justify-center">
-                        <Check className="w-6 h-6 text-blue-600" />
+              {/* Form Area */}
+              <div className="p-8 sm:p-10">
+
+                {/* Step Indicator */}
+                <div className="flex items-center justify-center gap-3 mb-8">
+                  {[1, 2].map((s) => (
+                    <React.Fragment key={s}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-black transition-all ${
+                        s < step ? 'bg-[#1D324B] text-white' :
+                        s === step ? 'bg-[#1D324B] text-white ring-4 ring-[#1D324B]/20' :
+                        'bg-gray-200 text-gray-400'
+                      }`}>
+                        {s < step ? <Check className="w-4 h-4" /> : s}
                       </div>
-                    )}
-                  </button>
-                ))}
-              </div>
+                      {s < 2 && (
+                        <div className={`h-1 w-16 rounded-full transition-all ${s < step ? 'bg-[#1D324B]' : 'bg-gray-200'}`} />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
 
-              <button
-                onClick={handleLogin}
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-3 uppercase tracking-wider"
-              >
-                เข้าสู่ระบบ
-                <ChevronRight className="w-5 h-5" />
-              </button>
+                <p className="text-center text-gray-500 text-sm font-medium mb-8">
+                  {step === 1 ? 'กรุณากรอกชื่อของคุณ' : 'เลือกรูปอวาตาร์ของคุณ'}
+                </p>
+
+                {/* Step 1: Name Input */}
+                {step === 1 && (
+                  <div className="space-y-5">
+                    <div>
+                      <label className="block text-sm font-bold text-[#1D324B] mb-2 uppercase tracking-wider">
+                        ชื่อ-นามสกุล
+                      </label>
+                      <input
+                        type="text"
+                        value={studentName}
+                        onChange={(e) => setStudentName(e.target.value)}
+                        placeholder="กรอกชื่อ-นามสกุล"
+                        className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-[#1D324B] focus:bg-white outline-none font-semibold text-[#1D324B] transition-all placeholder:text-gray-300"
+                        onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
+                      />
+                    </div>
+                    <button
+                      onClick={handleNameSubmit}
+                      disabled={!studentName.trim()}
+                      className="w-full py-4 bg-[#1D324B] hover:bg-[#152238] disabled:bg-gray-300 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:cursor-not-allowed"
+                    >
+                      ถัดไป
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Step 2: Avatar Selection */}
+                {step === 2 && (
+                  <div className="space-y-6">
+                    <div className="flex flex-col items-center mb-4">
+                      <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#1D324B] shadow-lg ring-4 ring-gray-100 mb-3">
+                        <img src={getAvatarUrl(selectedAvatar)} alt="Selected Avatar" className="w-full h-full object-cover" />
+                      </div>
+                      <p className="font-black text-[#1D324B] text-lg">{studentName}</p>
+                    </div>
+
+                    <div className="grid grid-cols-6 gap-3 max-h-60 overflow-y-auto p-1">
+                      {AVATAR_SEEDS.map((seed) => (
+                        <button
+                          key={seed}
+                          onClick={() => setSelectedAvatar(seed)}
+                          className={`relative rounded-full overflow-hidden border-2 transition-all aspect-square ${
+                            selectedAvatar === seed
+                              ? 'border-[#1D324B] ring-4 ring-[#1D324B]/20 scale-110'
+                              : 'border-gray-200 hover:border-[#1D324B]/50'
+                          }`}
+                        >
+                          <img src={getAvatarUrl(seed)} alt={seed} className="w-full h-full object-cover" />
+                          {selectedAvatar === seed && (
+                            <div className="absolute inset-0 bg-[#1D324B]/20 flex items-center justify-center">
+                              <Check className="w-5 h-5 text-[#1D324B]" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={handleLogin}
+                      className="w-full py-4 bg-[#1D324B] hover:bg-[#152238] text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                    >
+                      เข้าสู่ระบบ
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </div>
           </div>
 
-          {/* Saved Profiles Sidebar - Right Side */}
+          {/* Saved Profiles Sidebar */}
           {savedProfiles.length > 0 && (
             <div className="lg:col-span-4">
-              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl sticky top-6">
-                <div className="flex items-center gap-2 mb-6">
+              <div className="bg-white rounded-3xl border border-gray-200 shadow-md p-6 sticky top-6">
+                <div className="flex items-center gap-2 mb-5">
                   <History className="w-5 h-5 text-[#1D324B]" />
-                  <h3 className="text-lg font-black text-[#1D324B]">เข้าสู่ระบบด่วน</h3>
+                  <h3 className="text-base font-black text-[#1D324B]">เข้าสู่ระบบด่วน</h3>
                 </div>
-                <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                <div className="space-y-3 max-h-[520px] overflow-y-auto">
                   {savedProfiles.map((profile) => (
                     <div
                       key={profile.name}
-                      className="w-full p-4 bg-slate-50 hover:bg-blue-50 border-2 border-slate-200 hover:border-blue-400 rounded-2xl transition-all group relative cursor-pointer"
+                      className="w-full p-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 hover:border-[#1D324B]/40 rounded-2xl transition-all group relative"
                     >
                       <div className="flex items-center gap-3">
-                        <div 
+                        <div
                           onClick={() => handleQuickLogin(profile)}
                           className="flex items-center gap-3 flex-1 cursor-pointer"
                         >
-                          <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-slate-300 group-hover:border-blue-400 transition-colors flex-shrink-0">
-                            <img 
-                              src={getAvatarUrl(profile.avatar)} 
-                              alt={profile.name}
-                              className="w-full h-full object-cover"
-                            />
+                          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 group-hover:border-[#1D324B]/50 transition-colors flex-shrink-0">
+                            <img src={getAvatarUrl(profile.avatar)} alt={profile.name} className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-black text-[#1D324B] truncate">{profile.name}</p>
+                            <p className="font-black text-[#1D324B] truncate text-sm">{profile.name}</p>
                             {profile.groupName && (
-                              <p className="text-xs text-slate-500 font-medium truncate">{profile.groupName}</p>
+                              <p className="text-xs text-gray-500 font-medium truncate">{profile.groupName}</p>
                             )}
-                            <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                            <p className="text-[10px] text-gray-400 mt-0.5">
                               {new Date(profile.lastLogin).toLocaleDateString('th-TH', {
                                 month: 'short',
                                 day: 'numeric',
@@ -333,7 +280,7 @@ export default function StudentLoginPage(): React.ReactElement {
                           className="p-2 hover:bg-red-100 rounded-lg transition-colors flex-shrink-0"
                           title="ลบโปรไฟล์"
                         >
-                          <Trash2 className="w-4 h-4 text-red-600" />
+                          <Trash2 className="w-4 h-4 text-red-500" />
                         </button>
                       </div>
                     </div>
@@ -342,7 +289,14 @@ export default function StudentLoginPage(): React.ReactElement {
               </div>
             </div>
           )}
+
         </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-400 text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p>
+        </div>
+
       </div>
     </div>
   );

@@ -56,37 +56,64 @@ const PROJECT_GROUPS: ProjectGroup[] = [
     id: 'g1',
     groupName: 'Cyber Knights',
     projectName: 'AI Smart Home Dashboard',
-    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน']
+    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน'],
+    memberProfiles: [
+      { name: 'สมชาย สายเทพ', avatar: 'Felix' },
+      { name: 'วิภาวี มีสุข', avatar: 'Aneka' },
+      { name: 'กิตติศักดิ์ รักเรียน', avatar: 'Bob' }
+    ]
   },
   {
     id: 'g2',
     groupName: 'Quantum Coders',
     projectName: 'Blockchain Voting System',
-    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส']
+    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส'],
+    memberProfiles: [
+      { name: 'นพดล คนดี', avatar: 'George' },
+      { name: 'อรัญญา ฟ้าใส', avatar: 'Zoe' }
+    ]
   },
   {
     id: 'g3',
     groupName: 'Data Wizards',
     projectName: 'Predictive Analytics Tool',
-    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย']
+    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย'],
+    memberProfiles: [
+      { name: 'จิรายุ บินหลา', avatar: 'Max' },
+      { name: 'พิมลพรรณ วงศ์คำ', avatar: 'Luna' },
+      { name: 'ชลสิทธิ์ นิดหน่อย', avatar: 'Leo' }
+    ]
   },
   {
     id: 'g4',
     groupName: 'InnovateX',
     projectName: 'Smart City Traffic Control',
-    members: ['กมล แสนดี', 'ศิริพร สุขใจ']
+    members: ['กมล แสนดี', 'ศิริพร สุขใจ'],
+    memberProfiles: [
+      { name: 'กมล แสนดี', avatar: 'Oliver' },
+      { name: 'ศิริพร สุขใจ', avatar: 'Mia' }
+    ]
   },
   {
     id: 'g5',
     groupName: 'Tech Titans',
     projectName: 'Drone Delivery Network',
-    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส']
+    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส'],
+    memberProfiles: [
+      { name: 'ณัฐพล มั่นคง', avatar: 'Simon' },
+      { name: 'ธนภัทร เจริญ', avatar: 'Charlie' },
+      { name: 'วรินทร แก้วใส', avatar: 'Milo' }
+    ]
   },
   {
     id: 'g6',
     groupName: 'Code Breakers',
     projectName: 'Cybersecurity Shield',
-    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา']
+    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา'],
+    memberProfiles: [
+      { name: 'ปิติพงศ์ ยั่งยืน', avatar: 'Jack' },
+      { name: 'มัลลิกา งามตา', avatar: 'Sophie' }
+    ]
   }
 ];
 

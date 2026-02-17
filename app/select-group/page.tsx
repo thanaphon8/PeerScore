@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
+  Users,
   Plus,
   Check,
   ArrowRight,
@@ -27,6 +28,9 @@ interface UserData {
   avatar: string;
   userType: 'student' | 'teacher';
   groupId?: string;
+  groupName?: string;
+  projectName?: string;
+  isNewGroup?: boolean;
 }
 
 const PROJECT_GROUPS: ProjectGroup[] = [
@@ -34,37 +38,64 @@ const PROJECT_GROUPS: ProjectGroup[] = [
     id: 'g1',
     groupName: 'Cyber Knights',
     projectName: 'AI Smart Home Dashboard',
-    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน']
+    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน'],
+    memberProfiles: [
+      { name: 'สมชาย สายเทพ', avatar: 'Felix' },
+      { name: 'วิภาวี มีสุข', avatar: 'Aneka' },
+      { name: 'กิตติศักดิ์ รักเรียน', avatar: 'Bob' }
+    ]
   },
   {
     id: 'g2',
     groupName: 'Quantum Coders',
     projectName: 'Blockchain Voting System',
-    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส']
+    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส'],
+    memberProfiles: [
+      { name: 'นพดล คนดี', avatar: 'George' },
+      { name: 'อรัญญา ฟ้าใส', avatar: 'Zoe' }
+    ]
   },
   {
     id: 'g3',
     groupName: 'Data Wizards',
     projectName: 'Predictive Analytics Tool',
-    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย']
+    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย'],
+    memberProfiles: [
+      { name: 'จิรายุ บินหลา', avatar: 'Max' },
+      { name: 'พิมลพรรณ วงศ์คำ', avatar: 'Luna' },
+      { name: 'ชลสิทธิ์ นิดหน่อย', avatar: 'Leo' }
+    ]
   },
   {
     id: 'g4',
     groupName: 'InnovateX',
     projectName: 'Smart City Traffic Control',
-    members: ['กมล แสนดี', 'ศิริพร สุขใจ']
+    members: ['กมล แสนดี', 'ศิริพร สุขใจ'],
+    memberProfiles: [
+      { name: 'กมล แสนดี', avatar: 'Oliver' },
+      { name: 'ศิริพร สุขใจ', avatar: 'Mia' }
+    ]
   },
   {
     id: 'g5',
     groupName: 'Tech Titans',
     projectName: 'Drone Delivery Network',
-    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส']
+    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส'],
+    memberProfiles: [
+      { name: 'ณัฐพล มั่นคง', avatar: 'Simon' },
+      { name: 'ธนภัทร เจริญ', avatar: 'Charlie' },
+      { name: 'วรินทร แก้วใส', avatar: 'Milo' }
+    ]
   },
   {
     id: 'g6',
     groupName: 'Code Breakers',
     projectName: 'Cybersecurity Shield',
-    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา']
+    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา'],
+    memberProfiles: [
+      { name: 'ปิติพงศ์ ยั่งยืน', avatar: 'Jack' },
+      { name: 'มัลลิกา งามตา', avatar: 'Sophie' }
+    ]
   }
 ];
 
@@ -104,28 +135,6 @@ export default function SelectGroupPage(): React.ReactElement {
       const customGroups = JSON.parse(storedCustomGroups);
       allGroups = [...PROJECT_GROUPS, ...customGroups];
     }
-    
-    // Load room-specific member profiles
-    const roomMembersKey = `roomMembers_${roomIdFromUrl}`;
-    const storedRoomMembers = localStorage.getItem(roomMembersKey);
-    if (storedRoomMembers) {
-      const roomMembers = JSON.parse(storedRoomMembers);
-      
-      // Update groups with room-specific member data
-      allGroups = allGroups.map(group => {
-        if (roomMembers[group.id]) {
-          return {
-            ...group,
-            memberProfiles: roomMembers[group.id],
-            members: roomMembers[group.id].map((m: any) => 
-              typeof m === 'string' ? m : m.name
-            )
-          };
-        }
-        return group;
-      });
-    }
-    
     setProjectGroups(allGroups);
   }, [router, searchParams]);
 
@@ -135,7 +144,6 @@ export default function SelectGroupPage(): React.ReactElement {
     const selectedGroup = projectGroups.find(g => g.id === selectedGroupId);
     if (!selectedGroup) return;
 
-    // Update user data with group info - this ensures user is only in one group
     const updatedUserData = {
       ...userData,
       groupId: selectedGroupId,
@@ -145,44 +153,39 @@ export default function SelectGroupPage(): React.ReactElement {
     };
     localStorage.setItem('userData', JSON.stringify(updatedUserData));
 
-    // Update room-specific member assignments with profiles
+    // Update room-specific member assignments
     const roomMembersKey = `roomMembers_${roomId}`;
     const storedRoomMembers = localStorage.getItem(roomMembersKey);
-    const roomMembers: { [groupId: string]: any[] } = storedRoomMembers ? JSON.parse(storedRoomMembers) : {};
-    
-    const currentUserProfile = {
+    const roomMembers: { [groupId: string]: MemberProfile[] } = storedRoomMembers ? JSON.parse(storedRoomMembers) : {};
+
+    const currentUserProfile: MemberProfile = {
       name: userData.name,
       avatar: userData.avatar || 'default'
     };
-    
-    // Remove user from all groups
+
+    // Remove user from all other groups
     Object.keys(roomMembers).forEach(groupId => {
       roomMembers[groupId] = roomMembers[groupId].filter((m: any) => {
-        // Handle both old format (string) and new format (object)
         const memberName = typeof m === 'string' ? m : m.name;
         return memberName !== userData.name;
       });
     });
-    
-    // Add user to selected group
-    if (!roomMembers[selectedGroupId]) {
-      roomMembers[selectedGroupId] = [];
+
+    // If group has no roomMembers yet, seed from memberProfiles
+    if (!roomMembers[selectedGroupId] || roomMembers[selectedGroupId].length === 0) {
+      const baseProfiles = selectedGroup.memberProfiles
+        ? selectedGroup.memberProfiles.filter(m => m.name !== userData.name)
+        : selectedGroup.members.map(m => ({ name: m, avatar: m }));
+      roomMembers[selectedGroupId] = baseProfiles;
     }
-    const existsInGroup = roomMembers[selectedGroupId].some((m: any) => {
-      const memberName = typeof m === 'string' ? m : m.name;
-      return memberName === userData.name;
-    });
-    if (!existsInGroup) {
+
+    // Add current user if not already in group
+    const alreadyIn = roomMembers[selectedGroupId].some(m => m.name === userData.name);
+    if (!alreadyIn) {
       roomMembers[selectedGroupId].push(currentUserProfile);
     }
-    
-    // Save updated room members
+
     localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
-
-    // DON'T clear old submission data - allow user to evaluate their previous group
-    // The old code cleared submissions which prevented evaluation
-
-    // Navigate to main page
     router.push(`/?userGroupId=${selectedGroupId}&roomId=${roomId}`);
   };
 
@@ -219,38 +222,17 @@ export default function SelectGroupPage(): React.ReactElement {
                       : 'border-slate-200 hover:border-[#1D324B]/30 bg-white'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-black text-lg text-[#1D324B] mb-1">{group.groupName}</h3>
-                      <p className="text-sm text-slate-600 font-medium mb-3">{group.projectName}</p>
-                      
-                      {/* Display member avatars */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-500 font-bold">สมาชิก:</span>
-                        <div className="flex -space-x-2">
-                          {(group.memberProfiles && group.memberProfiles.length > 0
-                            ? group.memberProfiles
-                            : group.members.map(m => ({ name: m, avatar: m }))
-                          ).slice(0, 5).map((member, i) => (
-                            <div key={i} className="h-8 w-8 rounded-full border-2 border-white shadow-sm overflow-hidden">
-                              <img 
-                                src={getAvatarUrl(member.avatar)} 
-                                alt={member.name}
-                                className="object-cover w-full h-full"
-                              />
-                            </div>
-                          ))}
-                          {(group.memberProfiles ? group.memberProfiles.length : group.members.length) > 5 && (
-                            <div className="h-8 w-8 rounded-full border-2 border-white shadow-sm bg-slate-300 flex items-center justify-center">
-                              <span className="text-[10px] font-black text-slate-600">+{(group.memberProfiles ? group.memberProfiles.length : group.members.length) - 5}</span>
-                            </div>
-                          )}
-                        </div>
-                        <span className="text-xs text-slate-500 font-bold">({group.memberProfiles ? group.memberProfiles.length : group.members.length})</span>
+                      <p className="text-sm text-slate-600 font-medium mb-2">{group.projectName}</p>
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <Users className="w-3 h-3" />
+                        <span className="font-bold">{group.members.length} สมาชิก</span>
                       </div>
                     </div>
                     {selectedGroupId === group.id && (
-                      <div className="w-6 h-6 bg-[#1D324B] rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 bg-[#1D324B] rounded-full flex items-center justify-center">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                     )}
