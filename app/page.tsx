@@ -49,73 +49,41 @@ const PROJECT_GROUPS: ProjectGroup[] = [
     id: 'g1',
     groupName: 'Cyber Knights',
     projectName: 'AI Smart Home Dashboard',
-    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน'],
-    memberProfiles: [
-      { name: 'สมชาย สายเทพ', avatar: 'Felix' },
-      { name: 'วิภาวี มีสุข', avatar: 'Aneka' },
-      { name: 'กิตติศักดิ์ รักเรียน', avatar: 'Bob' }
-    ]
+    members: ['สมชาย สายเทพ', 'วิภาวี มีสุข', 'กิตติศักดิ์ รักเรียน']
   },
   {
     id: 'g2',
     groupName: 'Quantum Coders',
     projectName: 'Blockchain Voting System',
-    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส'],
-    memberProfiles: [
-      { name: 'นพดล คนดี', avatar: 'George' },
-      { name: 'อรัญญา ฟ้าใส', avatar: 'Zoe' }
-    ]
+    members: ['นพดล คนดี', 'อรัญญา ฟ้าใส']
   },
   {
     id: 'g3',
     groupName: 'Data Wizards',
     projectName: 'Predictive Analytics Tool',
-    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย'],
-    memberProfiles: [
-      { name: 'จิรายุ บินหลา', avatar: 'Max' },
-      { name: 'พิมลพรรณ วงศ์คำ', avatar: 'Luna' },
-      { name: 'ชลสิทธิ์ นิดหน่อย', avatar: 'Leo' }
-    ]
+    members: ['จิรายุ บินหลา', 'พิมลพรรณ วงศ์คำ', 'ชลสิทธิ์ นิดหน่อย']
   },
   {
     id: 'g4',
     groupName: 'InnovateX',
     projectName: 'Smart City Traffic Control',
-    members: ['กมล แสนดี', 'ศิริพร สุขใจ'],
-    memberProfiles: [
-      { name: 'กมล แสนดี', avatar: 'Oliver' },
-      { name: 'ศิริพร สุขใจ', avatar: 'Mia' }
-    ]
+    members: ['กมล แสนดี', 'ศิริพร สุขใจ']
   },
   {
     id: 'g5',
     groupName: 'Tech Titans',
     projectName: 'Drone Delivery Network',
-    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส'],
-    memberProfiles: [
-      { name: 'ณัฐพล มั่นคง', avatar: 'Simon' },
-      { name: 'ธนภัทร เจริญ', avatar: 'Charlie' },
-      { name: 'วรินทร แก้วใส', avatar: 'Milo' }
-    ]
+    members: ['ณัฐพล มั่นคง', 'ธนภัทร เจริญ', 'วรินทร แก้วใส']
   },
   {
     id: 'g6',
     groupName: 'Code Breakers',
     projectName: 'Cybersecurity Shield',
-    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา'],
-    memberProfiles: [
-      { name: 'ปิติพงศ์ ยั่งยืน', avatar: 'Jack' },
-      { name: 'มัลลิกา งามตา', avatar: 'Sophie' }
-    ]
+    members: ['ปิติพงศ์ ยั่งยืน', 'มัลลิกา งามตา']
   }
 ];
 
 const getRandomProfileImage = (seed: string): string => {
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
-};
-
-// Unified avatar function — use this everywhere
-const getAvatarUrl = (seed: string): string => {
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}&backgroundColor=ffffff`;
 };
 
@@ -210,8 +178,10 @@ export default function App(): React.ReactElement {
       }
     }
 
-    // Update room members for current user (always sync)
-    if (parsedUserData.groupId && parsedUserData.name && String(parsedUserData.userType) !== 'teacher') {
+    // Update room members if user has changed groups
+    if (parsedUserData.groupId && parsedUserData.name) {
+      let membersUpdated = false;
+      
       const currentUserProfile: MemberProfile = {
         name: parsedUserData.name,
         avatar: parsedUserData.avatar || 'default'
@@ -220,32 +190,36 @@ export default function App(): React.ReactElement {
       // Remove user from all groups first
       Object.keys(roomMembers).forEach(groupId => {
         roomMembers[groupId] = roomMembers[groupId].filter(m => m.name !== parsedUserData.name);
+        if (roomMembers[groupId].length !== (roomMembers[groupId] || []).length) {
+          membersUpdated = true;
+        }
       });
       
       // Add user to their current group
       if (!roomMembers[parsedUserData.groupId]) {
-        // If group has no room members yet, seed with existing memberProfiles
-        const existingGroup = allGroups.find(g => g.id === parsedUserData.groupId);
-        roomMembers[parsedUserData.groupId] = existingGroup?.memberProfiles 
-          ? existingGroup.memberProfiles.filter(m => m.name !== parsedUserData.name)
-          : [];
+        roomMembers[parsedUserData.groupId] = [];
       }
-      roomMembers[parsedUserData.groupId].push(currentUserProfile);
+      if (!roomMembers[parsedUserData.groupId].some(m => m.name === parsedUserData.name)) {
+        roomMembers[parsedUserData.groupId].push(currentUserProfile);
+        membersUpdated = true;
+      }
       
       // Save updated room members
-      localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
-      
-      // Update allGroups with new member data
-      allGroups = allGroups.map(group => {
-        if (roomMembers[group.id]) {
-          return { 
-            ...group, 
-            memberProfiles: roomMembers[group.id],
-            members: roomMembers[group.id].map(m => m.name)
-          };
-        }
-        return group;
-      });
+      if (membersUpdated) {
+        localStorage.setItem(roomMembersKey, JSON.stringify(roomMembers));
+        
+        // Update allGroups with new member data
+        allGroups = allGroups.map(group => {
+          if (roomMembers[group.id]) {
+            return { 
+              ...group, 
+              memberProfiles: roomMembers[group.id],
+              members: roomMembers[group.id].map(m => m.name)
+            };
+          }
+          return group;
+        });
+      }
     }
 
     setProjectGroups(allGroups);
@@ -255,7 +229,7 @@ export default function App(): React.ReactElement {
       setUserGroupId(groupIdFromUrl);
       
       // Load submitted groups for this specific groupId from URL
-      if (String(parsedUserData.userType) === 'student') {
+      if (parsedUserData.userType === 'student') {
         const storedSubmissions = localStorage.getItem(`submissions_${groupIdFromUrl}`);
         if (storedSubmissions) {
           setSubmittedGroups(JSON.parse(storedSubmissions));
@@ -265,7 +239,7 @@ export default function App(): React.ReactElement {
       }
     } else {
       // For teachers, set to first group or teacher's group
-      if (String(parsedUserData.userType) === 'teacher') {
+      if (parsedUserData.userType === 'teacher') {
         setUserGroupId(parsedUserData.groupId || 'teacher');
       } else {
         setUserGroupId(parsedUserData.groupId);
@@ -349,9 +323,8 @@ export default function App(): React.ReactElement {
 
   const handleSelectGroup = (group: ProjectGroup): void => {
     if (userData?.userType === 'teacher') {
-      // Teachers can evaluate or view analysis of any group
-      // Go to evaluate page so teacher can comment
-      router.push(`/evaluate?groupId=${group.id}&userGroupId=${userGroupId || 'teacher'}&roomId=${roomId}`);
+      // Teachers can view analysis of any group
+      router.push(`/analyze?userGroupId=${group.id}&roomId=${roomId}`);
     } else if (group.id === userGroupId) {
       router.push(`/analyze?userGroupId=${userGroupId}&roomId=${roomId}`);
     } else if (!submittedGroups.includes(group.id)) {
@@ -692,28 +665,34 @@ export default function App(): React.ReactElement {
                       </div>
 
                       {/* Member Section with Darker Background & No Line */}
-                              <div className={`relative z-10 p-5 pt-4 flex flex-col gap-4 ${footerBg}`}>
+                      <div className={`relative z-10 p-5 pt-4 flex flex-col gap-4 ${footerBg}`}>
                         <div className="flex items-end justify-between">
                             <div className="flex flex-col gap-2">
                                  <span className={`text-[9px] font-black uppercase tracking-widest ${isOwnGroup && !isTeacher ? 'text-white/80' : hasBeenEvaluated ? 'text-slate-400' : 'text-white/60'}`}>
-                                    MEMBERS: {group.memberProfiles ? group.memberProfiles.length : group.members.length}
+                                    MEMBERS: {isOwnGroup && !isTeacher ? group.members.length + 1 : group.members.length}
                                  </span>
                                  <div className="flex -space-x-3">
-                                    {(group.memberProfiles && group.memberProfiles.length > 0
-                                      ? group.memberProfiles
-                                      : group.members.map(m => ({ name: m, avatar: m }))
-                                    ).slice(0, 5).map((member, i) => (
-                                        <div key={i} className="h-10 w-10 rounded-full border-2 border-slate-200 shadow-sm transition-transform group-hover:translate-y-[-2px] overflow-hidden">
-                                          <img 
-                                            src={getAvatarUrl(member.avatar)} 
-                                            alt={member.name}
+                                    {isOwnGroup && !isTeacher && currentUserGroup && (
+                                        <div className="h-10 w-10 rounded-full border-2 border-slate-200 shadow-sm transition-transform group-hover:translate-y-[-2px] overflow-hidden">
+                                        <img 
+                                            src={getRandomProfileImage(userData.avatar)} 
+                                            alt={userData.name}
                                             className="object-cover w-full h-full"
-                                          />
+                                        />
+                                        </div>
+                                    )}
+                                    {group.members.slice(0, 5).map((member, i) => (
+                                        <div key={i} className="h-10 w-10 rounded-full border-2 border-slate-200 shadow-sm transition-transform group-hover:translate-y-[-2px] overflow-hidden">
+                                        <img 
+                                            src={getRandomProfileImage(member)} 
+                                            alt={member}
+                                            className="object-cover w-full h-full"
+                                        />
                                         </div>
                                     ))}
-                                    {(group.memberProfiles ? group.memberProfiles.length : group.members.length) > 5 && (
+                                    {group.members.length > 5 && (
                                       <div className="h-10 w-10 rounded-full border-2 border-slate-200 shadow-sm bg-slate-300 flex items-center justify-center">
-                                        <span className="text-xs font-black text-slate-600">+{(group.memberProfiles ? group.memberProfiles.length : group.members.length) - 5}</span>
+                                        <span className="text-xs font-black text-slate-600">+{group.members.length - 5}</span>
                                       </div>
                                     )}
                                 </div>
@@ -924,7 +903,7 @@ function CreateGroupModal({ isOpen, onClose, roomId, userData, onGroupCreated }:
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-slate-300">
-                      <img src={getAvatarUrl(user.avatar)} alt={user.name} className="w-full h-full object-cover" />
+                      <img src={getRandomProfileImage(user.name)} alt={user.name} className="w-full h-full object-cover" />
                     </div>
                     <p className="font-bold text-sm text-[#1D324B] truncate flex-1">{user.name}</p>
                     {selectedMembers.includes(user.name) && (
