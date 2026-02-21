@@ -119,67 +119,67 @@ export default function RoomLobby(): React.ReactElement {
 
   if (activeTab === 'create') {
     return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4 sm:p-8">
         <div className="w-full max-w-md">
-          <button onClick={() => setActiveTab(null)} className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-8 font-semibold text-sm transition-colors group">
+          <button onClick={() => setActiveTab(null)} className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-4 sm:mb-8 font-semibold text-sm transition-colors group">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> ย้อนกลับ
           </button>
 
           <div className="bg-white rounded-3xl shadow-md border border-gray-200 overflow-hidden">
-            <div className="bg-white px-10 pt-8 pb-0 flex flex-col items-center border-b border-gray-100">
-              <h1 className="text-4xl font-black tracking-widest mb-5" style={{ color: '#D4A017' }}>CREATE</h1>
-              <div className="w-52 h-52 relative">
+            <div className="bg-white px-6 sm:px-10 pt-6 sm:pt-8 pb-0 flex flex-col items-center border-b border-gray-100">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-widest mb-4 sm:mb-5" style={{ color: '#D4A017' }}>CREATE</h1>
+              <div className="w-36 h-36 sm:w-52 sm:h-52 relative">
                 <Image src="/images/create.png" alt="Create" fill className="object-contain" />
               </div>
             </div>
-            <div className="p-8 space-y-5">
+            <div className="p-6 sm:p-8 space-y-4 sm:space-y-5">
               <p className="text-center text-gray-500 text-sm font-medium mb-2">สร้างห้องใหม่สำหรับทีมของคุณ</p>
               <div>
                 <label className="block text-sm font-bold text-[#1D324B] mb-2 uppercase tracking-wider">ชื่อห้อง</label>
                 <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="เช่น CS101 Final Project Evaluation"
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-[#1D324B] focus:bg-white outline-none font-semibold text-[#1D324B] transition-all placeholder:text-gray-300" />
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-[#1D324B] focus:bg-white outline-none font-semibold text-[#1D324B] transition-all placeholder:text-gray-300 text-base" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-[#1D324B] mb-2 uppercase tracking-wider">Room ID (สร้างอัตโนมัติ)</label>
-                <div className="flex gap-3">
-                  <div className="flex-1 px-6 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl">
-                    <p className="text-3xl font-black text-[#1D324B] text-center tracking-widest">{generatedRoomId}</p>
+                <div className="flex gap-2 sm:gap-3">
+                  <div className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl">
+                    <p className="text-2xl sm:text-3xl font-black text-[#1D324B] text-center tracking-widest">{generatedRoomId}</p>
                   </div>
-                  <button onClick={() => setGeneratedRoomId(generateRoomId())} className="px-4 bg-gray-100 hover:bg-gray-200 border-2 border-gray-200 rounded-2xl transition-all" title="สุ่มใหม่">
+                  <button onClick={() => setGeneratedRoomId(generateRoomId())} className="px-3 sm:px-4 bg-gray-100 hover:bg-gray-200 border-2 border-gray-200 rounded-2xl transition-all" title="สุ่มใหม่">
                     <RefreshCw className="w-5 h-5 text-gray-500" />
                   </button>
                 </div>
               </div>
               <button onClick={handleCreateRoom} disabled={!roomName.trim()}
-                className="w-full py-4 bg-[#1D324B] hover:bg-[#152238] disabled:bg-gray-300 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:cursor-not-allowed">
+                className="w-full py-3 sm:py-4 bg-[#1D324B] hover:bg-[#152238] disabled:bg-gray-300 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:cursor-not-allowed text-sm sm:text-base">
                 <Sparkles className="w-5 h-5" /> สร้างห้อง
               </button>
             </div>
           </div>
 
-          <div className="mt-6 text-center"><p className="text-gray-400 text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p></div>
+          <div className="mt-4 sm:mt-6 text-center"><p className="text-gray-400 text-xs sm:text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p></div>
         </div>
 
         {showCreateSuccess && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-200">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-gray-200">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                  <Check className="w-8 h-8 text-[#1D324B]" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5">
+                  <Check className="w-7 h-7 sm:w-8 sm:h-8 text-[#1D324B]" />
                 </div>
-                <h2 className="text-2xl font-black text-[#1D324B] mb-2">สร้างห้องสำเร็จ!</h2>
-                <p className="text-gray-500 font-medium mb-6 text-sm">แชร์ Room ID นี้ให้กับเพื่อนของคุณ</p>
-                <div className="p-5 bg-gray-50 rounded-2xl border-2 border-gray-200 mb-6">
+                <h2 className="text-xl sm:text-2xl font-black text-[#1D324B] mb-2">สร้างห้องสำเร็จ!</h2>
+                <p className="text-gray-500 font-medium mb-5 sm:mb-6 text-sm">แชร์ Room ID นี้ให้กับเพื่อนของคุณ</p>
+                <div className="p-4 sm:p-5 bg-gray-50 rounded-2xl border-2 border-gray-200 mb-5 sm:mb-6">
                   <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">Room ID</p>
                   <div className="flex items-center justify-center gap-3">
-                    <p className="text-4xl font-black text-[#1D324B] tracking-widest">{roomId}</p>
+                    <p className="text-3xl sm:text-4xl font-black text-[#1D324B] tracking-widest">{roomId}</p>
                     <button onClick={() => handleCopyRoomId(roomId)} className="p-2 bg-white hover:bg-gray-100 border-2 border-gray-200 rounded-xl transition-all">
                       {copiedRoomId === roomId ? <Check className="w-5 h-5 text-[#1D324B]" /> : <Copy className="w-5 h-5 text-gray-400" />}
                     </button>
                   </div>
                 </div>
                 <button onClick={() => { setShowCreateSuccess(false); handleEnterRoom(roomId); }}
-                  className="w-full py-4 bg-[#1D324B] hover:bg-[#152238] text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest">
+                  className="w-full py-3 sm:py-4 bg-[#1D324B] hover:bg-[#152238] text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm sm:text-base">
                   เข้าสู่ห้อง <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -194,36 +194,36 @@ export default function RoomLobby(): React.ReactElement {
 
   if (activeTab === 'join') {
     return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4 sm:p-8">
         <div className="w-full max-w-md">
-          <button onClick={() => setActiveTab(null)} className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-8 font-semibold text-sm transition-colors group">
+          <button onClick={() => setActiveTab(null)} className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-4 sm:mb-8 font-semibold text-sm transition-colors group">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> ย้อนกลับ
           </button>
 
           <div className="bg-white rounded-3xl shadow-md border border-gray-200 overflow-hidden">
-            <div className="bg-white px-10 pt-8 pb-0 flex flex-col items-center border-b border-gray-100">
-              <h1 className="text-4xl font-black tracking-widest mb-5" style={{ color: '#3BAADF' }}>JOIN</h1>
-              <div className="w-52 h-52 relative">
+            <div className="bg-white px-6 sm:px-10 pt-6 sm:pt-8 pb-0 flex flex-col items-center border-b border-gray-100">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-widest mb-4 sm:mb-5" style={{ color: '#3BAADF' }}>JOIN</h1>
+              <div className="w-36 h-36 sm:w-52 sm:h-52 relative">
                 <Image src="/images/join.png" alt="Join" fill className="object-contain" />
               </div>
             </div>
-            <div className="p-8 space-y-5">
+            <div className="p-6 sm:p-8 space-y-4 sm:space-y-5">
               <p className="text-center text-gray-500 text-sm font-medium mb-2">ใส่ Room ID ที่คุณได้รับจากเพื่อนหรือครู</p>
               <div>
                 <label className="block text-sm font-bold text-[#1D324B] mb-2 uppercase tracking-wider">Room ID (6 หลัก)</label>
-                <input type="text" value={joinRoomId} onChange={(e) => setJoinRoomId(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                <input type="text" inputMode="numeric" value={joinRoomId} onChange={(e) => setJoinRoomId(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="000000" maxLength={6}
-                  className="w-full px-6 py-6 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-[#1D324B] focus:bg-white outline-none font-black text-[#1D324B] text-4xl text-center tracking-[0.5em] transition-all placeholder:text-gray-200" />
+                  className="w-full px-4 sm:px-6 py-4 sm:py-6 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-[#1D324B] focus:bg-white outline-none font-black text-[#1D324B] text-3xl sm:text-4xl text-center tracking-[0.5em] transition-all placeholder:text-gray-200" />
                 <p className="text-xs text-gray-400 font-medium mt-2 text-center">{joinRoomId.length}/6 ตัวอักษร</p>
               </div>
               <button onClick={handleJoinRoom} disabled={joinRoomId.length !== 6}
-                className="w-full py-4 bg-[#1D324B] hover:bg-[#152238] disabled:bg-gray-300 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:cursor-not-allowed">
+                className="w-full py-3 sm:py-4 bg-[#1D324B] hover:bg-[#152238] disabled:bg-gray-300 text-white font-black rounded-2xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:cursor-not-allowed text-sm sm:text-base">
                 เข้าร่วมห้อง <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          <div className="mt-6 text-center"><p className="text-gray-400 text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p></div>
+          <div className="mt-4 sm:mt-6 text-center"><p className="text-gray-400 text-xs sm:text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p></div>
         </div>
       </div>
     );
@@ -233,45 +233,45 @@ export default function RoomLobby(): React.ReactElement {
 
   if (activeTab === 'myteam') {
     return (
-      <div className="min-h-screen bg-gray-200 flex flex-col items-center justify-start p-8">
+      <div className="min-h-screen bg-gray-200 flex flex-col items-center justify-start p-4 sm:p-8">
         <div className="w-full max-w-2xl">
-          <button onClick={() => setActiveTab(null)} className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-8 font-semibold text-sm transition-colors group">
+          <button onClick={() => setActiveTab(null)} className="flex items-center gap-2 text-gray-500 hover:text-[#1D324B] mb-4 sm:mb-8 font-semibold text-sm transition-colors group">
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> ย้อนกลับ
           </button>
 
           <div className="bg-white rounded-3xl shadow-md border border-gray-200 overflow-hidden">
-            <div className="bg-white px-10 pt-8 pb-0 flex flex-col items-center border-b border-gray-100">
-              <h1 className="text-4xl font-black tracking-widest mb-5" style={{ color: '#7F5CFF' }}>MY TEAM</h1>
-              <div className="w-52 h-52 relative">
+            <div className="bg-white px-6 sm:px-10 pt-6 sm:pt-8 pb-0 flex flex-col items-center border-b border-gray-100">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-widest mb-4 sm:mb-5" style={{ color: '#7F5CFF' }}>MY TEAM</h1>
+              <div className="w-36 h-36 sm:w-52 sm:h-52 relative">
                 <Image src="/images/myteam.png" alt="My Team" fill className="object-contain" />
               </div>
             </div>
-            <div className="p-8">
-              <p className="text-center text-gray-500 text-sm font-medium mb-6">ห้องที่คุณสร้างหรือเคยเข้าร่วม</p>
+            <div className="p-5 sm:p-8">
+              <p className="text-center text-gray-500 text-sm font-medium mb-5 sm:mb-6">ห้องที่คุณสร้างหรือเคยเข้าร่วม</p>
               {myRooms.length > 0 ? (
-                <div className="grid gap-4">
+                <div className="grid gap-3 sm:gap-4">
                   {myRooms.map((room) => (
-                    <div key={room.id} className="p-5 bg-gray-50 border-2 border-gray-200 rounded-2xl hover:border-[#1D324B]/30 transition-all">
+                    <div key={room.id} className="p-4 sm:p-5 bg-gray-50 border-2 border-gray-200 rounded-2xl hover:border-[#1D324B]/30 transition-all">
                       <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="font-black text-base text-[#1D324B]">{room.name}</h3>
+                        <div className="flex-1 min-w-0 pr-2">
+                          <h3 className="font-black text-sm sm:text-base text-[#1D324B] truncate">{room.name}</h3>
                           <p className="text-xs text-gray-400 mt-0.5">สร้างโดย: {room.createdBy} • {new Date(room.createdAt).toLocaleDateString('th-TH')}</p>
                         </div>
-                        <button onClick={() => handleDeleteRoom(room.id)} className="p-2 hover:bg-red-100 rounded-lg transition-all">
+                        <button onClick={() => handleDeleteRoom(room.id)} className="p-2 hover:bg-red-100 rounded-lg transition-all flex-shrink-0">
                           <X className="w-4 h-4 text-red-400" />
                         </button>
                       </div>
-                      <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center justify-between gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
-                          <div className="px-4 py-2 bg-white border border-gray-200 rounded-xl">
+                          <div className="px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-xl">
                             <p className="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Room ID</p>
-                            <p className="text-xl font-black text-[#1D324B] tracking-wider">{room.id}</p>
+                            <p className="text-lg sm:text-xl font-black text-[#1D324B] tracking-wider">{room.id}</p>
                           </div>
                           <button onClick={() => handleCopyRoomId(room.id)} className="p-2 bg-white hover:bg-gray-100 border-2 border-gray-200 rounded-xl transition-all">
                             {copiedRoomId === room.id ? <Check className="w-4 h-4 text-[#1D324B]" /> : <Copy className="w-4 h-4 text-gray-400" />}
                           </button>
                         </div>
-                        <button onClick={() => handleEnterRoom(room.id)} className="px-5 py-2.5 bg-[#1D324B] hover:bg-[#152238] text-white font-black rounded-xl transition-all flex items-center gap-2 text-sm">
+                        <button onClick={() => handleEnterRoom(room.id)} className="px-3 sm:px-5 py-2 sm:py-2.5 bg-[#1D324B] hover:bg-[#152238] text-white font-black rounded-xl transition-all flex items-center gap-1 sm:gap-2 text-xs sm:text-sm whitespace-nowrap">
                           เข้าห้อง <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
@@ -279,7 +279,7 @@ export default function RoomLobby(): React.ReactElement {
                   ))}
                 </div>
               ) : (
-                <div className="py-12 text-center">
+                <div className="py-10 sm:py-12 text-center">
                   <p className="text-gray-400 font-bold mb-1">ยังไม่มีห้อง</p>
                   <p className="text-sm text-gray-300">สร้างห้องใหม่หรือเข้าร่วมห้องที่มีอยู่</p>
                 </div>
@@ -287,7 +287,7 @@ export default function RoomLobby(): React.ReactElement {
             </div>
           </div>
 
-          <div className="mt-6 text-center"><p className="text-gray-400 text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p></div>
+          <div className="mt-4 sm:mt-6 text-center"><p className="text-gray-400 text-xs sm:text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p></div>
         </div>
       </div>
     );
@@ -296,74 +296,74 @@ export default function RoomLobby(): React.ReactElement {
   // ─── MAIN LOBBY ──────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-200 flex flex-col items-center justify-center p-8">
+    <div className="min-h-screen bg-gray-200 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-4xl">
 
         {/* Header */}
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-md mx-auto mb-4">
+        <div className="text-center mb-6 sm:mb-10">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-4 border-white shadow-md mx-auto mb-3 sm:mb-4">
             <img src={getAvatarUrl(userData.avatar)} alt={userData.name} className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-3xl font-black text-[#1D324B] mb-1">ยินดีต้อนรับ, {userData.name}</h1>
-          <p className="text-gray-500 text-base">เลือกสิ่งที่ต้องการทำ</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#1D324B] mb-1">ยินดีต้อนรับ, {userData.name}</h1>
+          <p className="text-gray-500 text-sm sm:text-base">เลือกสิ่งที่ต้องการทำ</p>
         </div>
 
         {/* 3 Cards */}
-        <div className="grid sm:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
 
           {/* CREATE */}
           <button
             onClick={() => setActiveTab('create')}
-            className="group bg-white rounded-3xl flex flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 hover:border-yellow-300 overflow-hidden"
+            className="group bg-white rounded-3xl flex flex-row sm:flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 hover:border-yellow-300 overflow-hidden"
           >
-            <div className="bg-white w-full pt-8 pb-2 flex flex-col items-center">
-              <p className="text-3xl font-black tracking-widest mb-5" style={{ color: '#D4A017' }}>CREATE</p>
-              <div className="w-48 h-48 relative">
+            <div className="bg-white w-32 sm:w-full h-32 sm:h-auto pt-4 sm:pt-8 pb-4 sm:pb-2 flex flex-col items-center flex-shrink-0">
+              <div className="w-20 h-20 sm:w-48 sm:h-48 relative">
                 <Image src="/images/create.png" alt="Create Room" fill className="object-contain" />
               </div>
             </div>
-            <div className="px-6 py-4 text-center">
-              <p className="text-gray-400 text-xs font-medium">สร้างห้องใหม่สำหรับทีม</p>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 text-left sm:text-center flex-1 sm:flex-none">
+              <p className="text-xl sm:text-3xl font-black tracking-widest mb-1 sm:mb-0" style={{ color: '#D4A017' }}>CREATE</p>
+              <p className="text-gray-400 text-xs font-medium sm:mt-1">สร้างห้องใหม่สำหรับทีม</p>
             </div>
           </button>
 
           {/* JOIN */}
           <button
             onClick={() => setActiveTab('join')}
-            className="group bg-white rounded-3xl flex flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 hover:border-sky-300 overflow-hidden"
+            className="group bg-white rounded-3xl flex flex-row sm:flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 hover:border-sky-300 overflow-hidden"
           >
-            <div className="bg-white w-full pt-8 pb-2 flex flex-col items-center">
-              <p className="text-3xl font-black tracking-widest mb-5" style={{ color: '#3BAADF' }}>JOIN</p>
-              <div className="w-48 h-48 relative">
+            <div className="bg-white w-32 sm:w-full h-32 sm:h-auto pt-4 sm:pt-8 pb-4 sm:pb-2 flex flex-col items-center flex-shrink-0">
+              <div className="w-20 h-20 sm:w-48 sm:h-48 relative">
                 <Image src="/images/join.png" alt="Join Room" fill className="object-contain" />
               </div>
             </div>
-            <div className="px-6 py-4 text-center">
-              <p className="text-gray-400 text-xs font-medium">เข้าร่วมด้วย Room ID</p>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 text-left sm:text-center flex-1 sm:flex-none">
+              <p className="text-xl sm:text-3xl font-black tracking-widest mb-1 sm:mb-0" style={{ color: '#3BAADF' }}>JOIN</p>
+              <p className="text-gray-400 text-xs font-medium sm:mt-1">เข้าร่วมด้วย Room ID</p>
             </div>
           </button>
 
           {/* MY TEAM */}
           <button
             onClick={() => setActiveTab('myteam')}
-            className="group bg-white rounded-3xl flex flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 hover:border-purple-300 overflow-hidden"
+            className="group bg-white rounded-3xl flex flex-row sm:flex-col items-center shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200 hover:border-purple-300 overflow-hidden"
           >
-            <div className="bg-white w-full pt-8 pb-2 flex flex-col items-center">
-              <p className="text-3xl font-black tracking-widest mb-5" style={{ color: '#7F5CFF' }}>MY TEAM</p>
-              <div className="w-48 h-48 relative">
+            <div className="bg-white w-32 sm:w-full h-32 sm:h-auto pt-4 sm:pt-8 pb-4 sm:pb-2 flex flex-col items-center flex-shrink-0">
+              <div className="w-20 h-20 sm:w-48 sm:h-48 relative">
                 <Image src="/images/myteam.png" alt="My Team" fill className="object-contain" />
               </div>
             </div>
-            <div className="px-6 py-4 text-center">
-              <p className="text-gray-400 text-xs font-medium">ห้องของฉัน ({myRooms.length})</p>
+            <div className="px-4 sm:px-6 py-3 sm:py-4 text-left sm:text-center flex-1 sm:flex-none">
+              <p className="text-xl sm:text-3xl font-black tracking-widest mb-1 sm:mb-0" style={{ color: '#7F5CFF' }}>MY TEAM</p>
+              <p className="text-gray-400 text-xs font-medium sm:mt-1">ห้องของฉัน ({myRooms.length})</p>
             </div>
           </button>
 
         </div>
 
         {/* Footer */}
-        <div className="mt-10 text-center">
-          <p className="text-gray-400 text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p>
+        <div className="mt-6 sm:mt-10 text-center">
+          <p className="text-gray-400 text-xs sm:text-sm">ระบบประเมินกลุ่มโปรเจกต์ สำหรับการเรียนการสอน</p>
         </div>
 
       </div>
